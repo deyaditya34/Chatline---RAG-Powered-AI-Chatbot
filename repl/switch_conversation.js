@@ -34,11 +34,9 @@ export async function switch_conversation(conv_id) {
 	sanitize_and_print_conversation(parsed_conversation_history);
 
 	while (true) {
-		process.stdout.write("\x1B[38;2;255;180;180m");
 		user_response = await read_user_input(
 			process.env.USER_CONV_DISPLAY_NAME
 		);
-		process.stdout.write("\x1B[0m");
 
 		if (input.startsWith("/")) {
 			const [command, args] = parse_command(user_response);

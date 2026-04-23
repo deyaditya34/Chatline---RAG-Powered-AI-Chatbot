@@ -25,11 +25,9 @@ export async function new_conversation(conv_name) {
 
 	console.log(user_prompts.chat_user_prompt);
 	while (true) {
-		process.stdout.write("\x1B[38;2;255;180;180m");
 		user_response = await read_user_input(
 			process.env.USER_CONV_DISPLAY_NAME
 		);
-		process.stdout.write("\x1B[0m");
 
 		if (user_response.startsWith("/")) {
 			const [command, args] = parse_command(user_response);
