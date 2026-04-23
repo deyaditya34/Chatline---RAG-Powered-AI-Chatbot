@@ -1,0 +1,133 @@
+import { print_help_command } from "./repl/help.js";
+import { change_ai_model } from "./repl/model_set.js";
+import { get_model_info } from "./repl/model_info.js";
+import { one_time_chat } from "./repl/one_time_chat.js";
+import { new_conversation } from "./repl/new_conversation.js";
+import { switch_conversation } from "./repl/switch_conversation.js";
+import { conversation_history } from "./repl/conversation_history.js";
+import { list_conversation } from "./repl/list_conversations.js";
+import { delete_conversation } from "./repl/delete_conversation.js";
+import { new_interaction } from "./repl/new_interaction.js";
+import { interaction_history } from "./repl/interaction_history.js";
+import { switch_interaction } from "./repl/switch_interaction.js";
+import { list_interaction } from "./repl/list_interactions.js";
+import { delete_interaction } from "./repl/delete_interaction.js";
+import { print_output } from "./utils.js";
+import { print_current_status } from "./repl/current_status.js";
+import {
+	ai, ai_model, system_instruction, ai_model_list,
+	initialize_ai, get_ai_model_details, generate_content
+} from "./ai_model.js";
+
+export let mode = process.env.DEFAULT_MODE;
+
+export async function handle_command(command, args) {
+	let conv_name;
+	let message;
+	let conv_id;
+
+	switch (command) {
+		case "help":
+			print_help_command();
+			break;
+
+		case "models":
+			const list = await ai_model_list(ai);
+			print_output(list, process.env.MODEL_DISPLAY_NAME, "model_list");
+			break;
+
+		case "model":
+			if (!args.length) {
+				console.error("usage: /set_model <name>");
+				break;
+			}
+			const model_set = await change_ai_model(args[0]);
+			if (!model_set) {
+				console.error("invalid model name");
+			} else {
+				console.log("current model :", args[0]);
+			}
+			break;
+
+		case "model_info":
+			try {
+				const model_info = await get_model_info(args[0]);
+				print_output(model_info, process.env.MODEL_DISPLAY_NAME, "model_info");
+			} catch (err) {
+				console.log(err.message);
+			}
+			break;
+
+		case "status":
+			print_current_status();
+			break;
+
+		case "chat":
+			message = args.join(" ");
+			const response = await one_time_chat(message);
+			print_output(response, process.env.MODEL_DISPLAY_NAME, "conversations");
+			break;
+
+		case "stream":
+			message = args.join(" ");
+			break;
+
+		case "new":
+			conv_name = args.join(" ");
+			if (mode === "rest") {
+				await new_conversation(conv_name);
+			} else {
+				await new_interaction(conv_name);
+			}
+			break;
+
+		case "switch":
+			conv_id = args[0];
+			if (mode === "rest") {
+				await switch_conversation(conv_id);
+			} else {
+				await switch_interaction(conv_id);
+			}
+			break;
+
+		case "history":
+			conv_id = args[0]
+			if (mode === "rest") {
+				await conversation_history(conv_id);
+			} else {
+				await interaction_history(conv_id);
+			}
+			break;
+
+		case "mode":
+			const user_input = args[0];
+			if (args[0] === "sdk" || args[0] === "rest" || args[0] === "interactions") {
+				mode = args[0];
+			} else {
+				console.log("invalid_user_input");
+			}
+			break;
+
+		case "list":
+			if (mode === "rest") {
+				await list_conversation();
+			} else {
+				await list_interaction();
+			}
+			break;
+
+		case "delete":
+			conv_id = args[0];
+			if (mode === "rest") {
+				await delete_conversation(conv_id);
+			} else {
+				await delete_interaction(conv_id);
+			}
+			break;
+
+		case "exit":
+			process.exit(0);
+			break;
+	}
+}
+
