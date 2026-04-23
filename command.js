@@ -99,7 +99,7 @@ export async function handle_command(command, args) {
 			}
 			break;
 
-		case "mode":
+		case "conversation_mode":
 			const user_input = args[0];
 			if (args[0] === "sdk" || args[0] === "rest" || args[0] === "interactions") {
 				mode = args[0];
@@ -128,6 +128,10 @@ export async function handle_command(command, args) {
 		case "exit":
 			process.exit(0);
 			break;
+
+		default:
+			console.log(`invalid command: /${command} ${args.join(" ")}`);
+			console.log(`\x1B[38;2;255;180;180mType /help for commands\n\x1B[0m`)
 	}
 }
 
