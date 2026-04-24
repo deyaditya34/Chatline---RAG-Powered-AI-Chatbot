@@ -12,19 +12,24 @@ async function main() {
 	console.log(`\x1B[38;2;255;180;180mType /help for commands\n\x1B[0m`)
 
 	let running = true;
-
 	try {
-		fs.readdirSync(
-			`${process.env.STATELESS_CONV_STORAGE_DIR}`);
+		fs.readdirSync(`${process.env.CONV_STORAGE_DIR}`)
 	} catch (err) {
-		fs.mkdirSync(`${process.env.STATELESS_CONV_STORAGE_DIR}`);
+		fs.mkdirSync(`${process.env.CONV_STORAGE_DIR}`);
 	}
 
 	try {
 		fs.readdirSync(
-			`${process.env.INTERACTION_CONV_STORAGE_DIR}`);
+			`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`);
 	} catch (err) {
-		fs.mkdirSync(`${process.env.INTERACTION_CONV_STORAGE_DIR}`);
+		fs.mkdirSync(`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`);
+	}
+
+	try {
+		fs.readdirSync(
+			`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`);
+	} catch (err) {
+		fs.mkdirSync(`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`);
 	}
 
 	while (running) {
