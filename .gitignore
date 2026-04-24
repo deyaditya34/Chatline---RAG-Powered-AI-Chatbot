@@ -1,2 +1,4 @@
 node_modules
 .env
+stateless_conv_dir
+interaction_conv_dir
