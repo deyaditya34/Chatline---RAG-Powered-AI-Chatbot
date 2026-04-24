@@ -14,8 +14,9 @@ export async function new_conversation(conv_name) {
 	} else {
 		chat_topic = `${conv_name}`;
 	}
+
 	const chat_save_dir =
-		`${process.env.STATELESS_CONV_STORAGE_DIR}`; // conversation storing directory
+		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`; // conversation storing directory
 
 	const initital_conversation_boilerplate = create_conversation_record();
 	fs.writeFileSync(

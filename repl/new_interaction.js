@@ -16,8 +16,9 @@ export async function new_interaction(conv_name) {
 	} else {
 		chat_topic = `${conv_name}`;
 	}
+
 	const chat_save_dir =
-		`${process.env.INTERACTION_CONV_STORAGE_DIR}`;
+		`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
 
 	const initial_interaction_boilderplate = create_interaction_record();
 	fs.writeFileSync(

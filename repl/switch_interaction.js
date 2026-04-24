@@ -20,8 +20,11 @@ export async function switch_interaction(interaction_id) {
 		return;
 	}
 
+	const chat_save_dir =
+		`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
+
 	const interaction_list = await fs.readdirSync(
-		`${process.env.INTERACTION_CONV_STORAGE_DIR}`
+		`${chat_save_dir}`
 	);
 
 	const fileNo = Number(interaction_id) - 1;
@@ -33,7 +36,7 @@ export async function switch_interaction(interaction_id) {
 
 	const fileName = interaction_list[fileNo];
 	const interaction_history = fs.readFileSync(
-		`${process.env.INTERACTION_CONV_STORAGE_DIR}/${fileName}`
+		`${chat_save_dir}/${fileName}`
 	);
 	const parsed_interaction_history = JSON.parse(interaction_history.toString());
 	prev_model_response_id = parse_prev_model_response_id(parsed_interaction_history);
@@ -67,7 +70,7 @@ export async function switch_interaction(interaction_id) {
 			parsed_interaction_history.model_version = model_version;
 
 			fs.writeFileSync(
-				`${process.env.INTERACTION_CONV_STORAGE_DIR}/${fileName}`,
+				`${chat_save_dir}/${fileName}`,
 				JSON.stringify(parsed_interaction_history)
 			);
 		};

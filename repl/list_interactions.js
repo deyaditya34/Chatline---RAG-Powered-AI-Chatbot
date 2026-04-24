@@ -4,8 +4,11 @@ import user_prompts from "../prompts/default_user_prompts.json" with {type: "jso
 import { print_list  } from "../utils.js";
 
 export async function list_interaction() {
+	const chat_save_dir =
+		`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
+
 	const interaction_list = await fs.readdirSync(
-		`${process.env.INTERACTION_CONV_STORAGE_DIR}`
+		`${chat_save_dir}`
 	);
 
 	if (!interaction_list.length) {

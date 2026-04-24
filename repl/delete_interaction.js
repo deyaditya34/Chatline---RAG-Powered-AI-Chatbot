@@ -8,8 +8,11 @@ export async function delete_interaction(interaction_id) {
 		return;
 	}
 
+	const chat_save_dir =
+		`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
+
 	const interaction_list = await fs.readdirSync(
-		`${process.env.INTERACTION_CONV_STORAGE_DIR}`
+		`${chat_save_dir}`
 	);
 
 	if (Number(interaction_id) > interaction_list.length) {
@@ -18,7 +21,7 @@ export async function delete_interaction(interaction_id) {
 	}
 
 	const fileName = `${interaction_list[Number(interaction_id) - 1]}`;
-	const filePath = `${process.env.INTERACTION_CONV_STORAGE_DIR}/${fileName}`;
+	const filePath = `${chat_save_dir}/${fileName}`;
 
 	try {
 		await fs.unlinkSync(filePath);

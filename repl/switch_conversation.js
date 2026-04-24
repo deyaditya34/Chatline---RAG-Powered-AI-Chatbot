@@ -15,8 +15,11 @@ export async function switch_conversation(conv_id) {
 		return;
 	}
 
+	const chat_save_dir =
+		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
+
 	const conversation_list = await fs.readdirSync(
-		`${process.env.STATELESS_CONV_STORAGE_DIR}`
+		`${chat_save_dir}`
 	);
 
 	const fileNo = Number(conv_id) - 1;
@@ -28,7 +31,7 @@ export async function switch_conversation(conv_id) {
 
 	const fileName = conversation_list[fileNo];
 	const conversation_history = fs.readFileSync(
-		`${process.env.STATELESS_CONV_STORAGE_DIR}/${fileName}`
+		`${chat_save_dir}/${fileName}`
 	);
 	const parsed_conversation_history = JSON.parse(conversation_history.toString());
 	sanitize_and_print_conversation(parsed_conversation_history);
@@ -60,7 +63,7 @@ export async function switch_conversation(conv_id) {
 		parsed_conversation_history.model_version = model_version;
 
 		fs.writeFileSync(
-			`${process.env.STATELESS_CONV_STORAGE_DIR}/${fileName}`,
+			`${chat_save_dir}/${fileName}`,
 			JSON.stringify(parsed_conversation_history)
 		);
 	}

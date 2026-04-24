@@ -1,4 +1,5 @@
 node_modules
 .env
-stateless_conv_dir
-interaction_conv_dir
+data
+context_related_controls.txt
+response_output.json

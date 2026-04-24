@@ -8,8 +8,11 @@ export async function conversation_history(conv_id) {
 		return;
 	}
 
+	const chat_save_dir =
+		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
+
 	const conversation_list = await fs.readdirSync(
-		`${process.env.STATELESS_CONV_STORAGE_DIR}`
+		`${chat_save_dir}`
 	);
 
 	if (Number(conv_id) > conversation_list.length) {
@@ -18,7 +21,7 @@ export async function conversation_history(conv_id) {
 	}
 
 	const fileName = `${conversation_list[Number(conv_id) - 1]}`;
-	const filePath = `${process.env.STATELESS_CONV_STORAGE_DIR}/${fileName}`;
+	const filePath = `${chat_save_dir}/${fileName}`;
 	const conversation = fs.readFileSync(filePath);
 	const parsed_conversation = JSON.parse(conversation.toString());
 
