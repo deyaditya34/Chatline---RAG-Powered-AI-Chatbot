@@ -1,3 +1,4 @@
 {
-"starting_chat_message" : "I have built a gemini cli though gemini sdk available in nodejs. So kindly just acknowledge the chat connection and ask the user to start chatting"
+"starting_chat_message" : "I have built a gemini cli though gemini sdk available in nodejs. So kindly just acknowledge the chat connection and ask the user to start chatting",
+"summarize_user_conv_prompt": "summarize the above contents such that it contains all the vital information"
 }
