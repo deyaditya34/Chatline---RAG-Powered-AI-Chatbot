@@ -14,10 +14,11 @@ import { list_interaction } from "./repl/list_interactions.js";
 import { delete_interaction } from "./repl/delete_interaction.js";
 import { print_output } from "./utils.js";
 import { print_current_status } from "./repl/current_status.js";
-import {
-	ai, ai_model, system_instruction, ai_model_list,
-	initialize_ai, get_ai_model_details, generate_content
-} from "./ai_model.js";
+import { new_sliding_window_conversation } from "./repl/new_conversation_fixed_sliding_window.js";
+import { switch_sliding_window_conversation } from "./repl/switch_conversation_fixed_sliding_window.js";
+import { new_sliding_window_token_based_conversation } from "./repl/new_conversation_token_based_sliding_window.js";
+import { switch_sliding_window_token_based_conversation } from "./repl/switch_conversation_token_based_sliding_window.js";
+import { ai, ai_model_list } from "./ai_model.js";
 
 export let mode = process.env.DEFAULT_MODE;
 
@@ -75,7 +76,7 @@ export async function handle_command(command, args) {
 		case "new":
 			conv_name = args.join(" ");
 			if (mode === "rest") {
-				await new_conversation(conv_name);
+				await new_sliding_window_token_based_conversation(conv_name);
 			} else {
 				await new_interaction(conv_name);
 			}
@@ -84,7 +85,7 @@ export async function handle_command(command, args) {
 		case "switch":
 			conv_id = args[0];
 			if (mode === "rest") {
-				await switch_conversation(conv_id);
+				await switch_sliding_window_token_based_conversation(conv_id);
 			} else {
 				await switch_interaction(conv_id);
 			}
