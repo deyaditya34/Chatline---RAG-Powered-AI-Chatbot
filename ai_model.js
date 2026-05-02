@@ -7,7 +7,8 @@ dotenv.config();
 export const ai = initialize_ai();
 export let ai_model = process.env.DEFAULT_MODEL;
 export let system_instruction = process.env.DEFAULT_SYSTEM_INSTRUCTION;
-
+export let sliding_window_size = process.env.DEFAULT_WINDOW_MESSAGE_TURNS;
+export let conversation_token_limit = Number(process.env.CONVERSATION_TOKEN_LIMIT);
 
 export function initialize_ai(
 ) {
@@ -79,6 +80,29 @@ export async function get_ai_model_details(initialized_ai, model) {
 	return response;
 }
 
+export async function count_tokens(contents, model = ai_model) {
+	try {
+		const query = await axios({
+			method: "POST",
+			url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:countTokens`,
+			headers: {
+				"Content-Type": "application/json",
+				"x-goog-api-key": `${process.env.GEMINI_API_KEY}`
+			},
+			data: {
+				contents: contents
+			},
+			responseType: "json"
+		});
+
+		const response = query.data;
+		console.log("token -", response.totalTokens);
+		return response;
+	} catch (err) {
+		console.log("err -", err);
+	}
+}
+
 export async function generate_content_using_http(
 	contents,
 	model = ai_model
@@ -106,7 +130,7 @@ export async function generate_content_using_http(
 				response += parts[i].text;
 		}
 	} catch (err) {
-		console.log("err -", err);
+		console.log("model response err -", err.data);
 	}
 
 	return [response, model_version];
