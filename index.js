@@ -32,6 +32,14 @@ async function main() {
 		fs.mkdirSync(`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`);
 	}
 
+	try {
+		fs.readdirSync(
+			`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_TOKEN_BASED_SLIDING_DIR}`);
+	} catch (err) {
+		fs.mkdirSync(
+			`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_TOKEN_BASED_SLIDING_DIR}`);
+	}
+
 	while (running) {
 		let input = await read_user_input(process.env.USER_DISPLAY_NAME);
 
