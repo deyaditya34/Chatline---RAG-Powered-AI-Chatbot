@@ -35,6 +35,8 @@ export function print_list(list) {
 export function create_conversation_record() {
 	const result = {};
 	result.contents = [];
+	result.chat_turns = 0;
+	result.chat_starting_index = 0;
 
 	return result;
 }
@@ -140,4 +142,14 @@ export function parse_command(input) {
 
 	command = command.slice(1, command.length);
 	return [command, args];
+}
+
+export function tail_conversation(contents, content_starting_index) {
+	const result = [];
+
+	for (let i = content_starting_index; i < contents.length; i++) {
+		result.push(contents[i]);
+	}
+
+	return result;
 }
