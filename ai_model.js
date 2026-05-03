@@ -6,7 +6,7 @@ dotenv.config();
 
 export const ai = initialize_ai();
 export let ai_model = process.env.DEFAULT_MODEL;
-export let system_instruction = process.env.DEFAULT_SYSTEM_INSTRUCTION;
+export let system_instruction_message = process.env.DEFAULT_SYSTEM_INSTRUCTION;
 export let sliding_window_size = process.env.DEFAULT_WINDOW_MESSAGE_TURNS;
 export let conversation_token_limit = Number(process.env.CONVERSATION_TOKEN_LIMIT);
 
@@ -24,7 +24,7 @@ export async function generate_content(
 	initialized_ai,
 	contents,
 	model = ai_model,
-	systemInstruction = system_instruction
+	systemInstruction = system_instruction_message
 ) {
 	const response = await initialized_ai.models.generateContent({
 		model,
@@ -105,10 +105,12 @@ export async function count_tokens(contents, model = ai_model) {
 
 export async function generate_content_using_http(
 	contents,
-	model = ai_model
+	model = ai_model,
 ) {
 	let response = "";
 	let model_version;
+
+	let system_instruction = {parts: [{text: system_instruction_message}]};
 	try {
 		const query = await axios({
 			method: "POST",
@@ -118,6 +120,7 @@ export async function generate_content_using_http(
 				"x-goog-api-key": `${process.env.GEMINI_API_KEY}`
 			},
 			data: {
+				system_instruction,
 				contents: contents
 			},
 			responseType: "json"
@@ -130,7 +133,7 @@ export async function generate_content_using_http(
 				response += parts[i].text;
 		}
 	} catch (err) {
-		console.log("model response err -", err.data);
+		console.log("model response err -", err);
 	}
 
 	return [response, model_version];
