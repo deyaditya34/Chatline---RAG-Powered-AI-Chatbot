@@ -1,7 +1,5 @@
 import fs from "fs";
-import dotenv from "dotenv";
-
-dotenv.config();
+import {system_instruction_message} from "./ai_model.js";
 
 // sanitize the conversation of either entity(user or model) so that the
 // conversation can be saved in the json file
@@ -44,7 +42,6 @@ export function create_conversation_record() {
 export function create_interaction_record() {
 	const result = {};
 	result.outputs = [];
-
 	return result;
 }
 
@@ -131,7 +128,6 @@ export function sanitize_and_print_interaction(interaction) {
 export function parse_prev_model_response_id(interaction_history) {
 	let result;
 	const int_history_output_len = interaction_history.outputs.length;
-	console.log("interaction_history -", interaction_history);
 	result = interaction_history.outputs[int_history_output_len - 1].response_id;
 
 	return result;
