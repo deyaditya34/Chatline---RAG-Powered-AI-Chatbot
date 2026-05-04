@@ -142,11 +142,12 @@ export async function generate_content_using_http(
 export async function create_new_interaction(
 	content,
 	prev_interaction_id = "",
-	model = ai_model
+	model = ai_model,
 ) {
 	let req_body = {};
 	req_body.input = content;
 	req_body.model = model;
+	req_body.system_instruction = system_instruction_message;	
 
 	if (prev_interaction_id) {
 		req_body.previous_interaction_id = prev_interaction_id;
@@ -176,7 +177,7 @@ export async function create_new_interaction(
 		model_response_id = query.data.id;
 		model_version = query.data.model;
 	} catch (err) {
-		console.log("err -", err.message, err.code);
+		console.log("err -", err);
 	}
 
 	return [model_response, model_version, model_response_id];
