@@ -32,7 +32,7 @@ export async function new_interaction(conv_name) {
 			process.env.USER_CONV_DISPLAY_NAME
 		);
 
-		if (input.startsWith("/")) {
+		if (user_response.startsWith("/")) {
 			const [command, args] = parse_command(user_response);
 
 			await handle_command(command, args);
