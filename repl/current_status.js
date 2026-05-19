@@ -1,5 +1,5 @@
 import {ai_model, system_instruction_message} from "../ai_model.js";
-import {mode} from "../command.js";
+import {mode} from "../session.js";
 
 export function print_current_status() {
 	process.stdout.write("\x1B[38;2;255;180;180m");

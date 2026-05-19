@@ -7,15 +7,10 @@ import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
 import { sanitize_conversation, sanitize_and_print_conversation, print_output } from "../utils.js";
 import { generate_content_using_http, sliding_window_size, conversation_token_limit, count_tokens } from "../ai_model.js";
 
-export async function switch_sliding_window_token_based_conversation(conv_id) {
+export async function switch_sliding_window_token_based_conversation(conv_name) {
 	let user_response;
 	let model_response;
 	let sanitize_model_response;
-
-	if (!conv_id) {
-		console.log("usage: /switch <id>");
-		return;
-	}
 
 	const chat_save_dir_for_user =
 		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
@@ -23,18 +18,7 @@ export async function switch_sliding_window_token_based_conversation(conv_id) {
 	const chat_save_dir_for_model =
 		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_TOKEN_BASED_SLIDING_DIR}`;
 
-	const conversation_list = await fs.readdirSync(
-		`${chat_save_dir_for_user}`
-	);
-
-	const fileNo = Number(conv_id) - 1;
-
-	if (fileNo > conversation_list.length - 1 || !Number(conv_id)) {
-		console.log("invalid input");
-		return;
-	}
-
-	const fileName = conversation_list[fileNo];
+	const fileName = conv_name;
 	let conversation_history_user = fs.readFileSync(
 		`${chat_save_dir_for_user}/${fileName}`
 	);

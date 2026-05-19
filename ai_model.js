@@ -6,6 +6,7 @@ dotenv.config();
 
 export const ai = initialize_ai();
 export let ai_model = process.env.DEFAULT_MODEL;
+export let embedding_model = process.env.DEFAULT_EMBEDDING_MODEL;
 export let system_instruction_message = process.env.DEFAULT_SYSTEM_INSTRUCTION;
 export let sliding_window_size = process.env.DEFAULT_WINDOW_MESSAGE_TURNS;
 export let conversation_token_limit = Number(process.env.CONVERSATION_TOKEN_LIMIT);
@@ -18,6 +19,10 @@ export function initialize_ai(
 
 export function set_ai_model(model_name) {
 	ai_model = model_name;
+}
+
+export function set_embedding_model(model_name) {
+	embedding_model = model_name;
 }
 
 export async function generate_content(
@@ -96,7 +101,25 @@ export async function count_tokens(contents, model = ai_model) {
 		});
 
 		const response = query.data;
-		console.log("token -", response.totalTokens);
+		return response;
+	} catch (err) {
+		console.log("err -", err);
+	}
+}
+
+export async function embed_content(content, model = embedding_model) {
+	try {
+		const query = await axios({
+			method: "POST",
+			url: `https://generativelanguage.googleapis.com/v1beta/models/${embedding_model}:embedContent`,
+			headers: {
+				"Content-Type": "application/json",
+				"x-goog-api-key": `${process.env.GEMINI_API_KEY}`
+			},
+			data: {content}
+		})
+
+		const response = query.data;
 		return response;
 	} catch (err) {
 		console.log("err -", err);
@@ -110,7 +133,7 @@ export async function generate_content_using_http(
 	let response = "";
 	let model_version;
 
-	let system_instruction = {parts: [{text: system_instruction_message}]};
+	let system_instruction = { parts: [{ text: system_instruction_message }] };
 	try {
 		const query = await axios({
 			method: "POST",
@@ -147,7 +170,7 @@ export async function create_new_interaction(
 	let req_body = {};
 	req_body.input = content;
 	req_body.model = model;
-	req_body.system_instruction = system_instruction_message;	
+	req_body.system_instruction = system_instruction_message;
 
 	if (prev_interaction_id) {
 		req_body.previous_interaction_id = prev_interaction_id;

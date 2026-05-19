@@ -18,9 +18,14 @@ import { new_sliding_window_conversation } from "./repl/new_conversation_fixed_s
 import { switch_sliding_window_conversation } from "./repl/switch_conversation_fixed_sliding_window.js";
 import { new_sliding_window_token_based_conversation } from "./repl/new_conversation_token_based_sliding_window.js";
 import { switch_sliding_window_token_based_conversation } from "./repl/switch_conversation_token_based_sliding_window.js";
-import { ai, ai_model_list } from "./ai_model.js";
+import {
+	mode, set_conversation_mode, current_conversation_id,
+	set_current_conversation_id_for_new_conv,
+	set_current_conversation_id_for_switch_conv
+}
+	from "./session.js";
 
-export let mode = process.env.DEFAULT_MODE;
+import { ai, ai_model_list } from "./ai_model.js";
 
 export async function handle_command(command, args) {
 	let conv_name;
@@ -76,7 +81,8 @@ export async function handle_command(command, args) {
 		case "new":
 			conv_name = args.join(" ");
 			if (mode === "rest") {
-				await new_sliding_window_token_based_conversation(conv_name);
+				set_current_conversation_id_for_new_conv(conv_name);
+				await new_sliding_window_token_based_conversation(current_conversation_id);
 			} else {
 				await new_interaction(conv_name);
 			}
@@ -85,7 +91,8 @@ export async function handle_command(command, args) {
 		case "switch":
 			conv_id = args[0];
 			if (mode === "rest") {
-				await switch_sliding_window_token_based_conversation(conv_id);
+				await set_current_conversation_id_for_switch_conv(conv_id);
+				await switch_sliding_window_token_based_conversation(current_conversation_id);
 			} else {
 				await switch_interaction(conv_id);
 			}
@@ -103,7 +110,7 @@ export async function handle_command(command, args) {
 		case "conversation_mode":
 			const user_input = args[0];
 			if (args[0] === "sdk" || args[0] === "rest" || args[0] === "interactions") {
-				mode = args[0];
+				set_conversation_mode(args[0]);
 			} else {
 				console.log("invalid_user_input");
 			}

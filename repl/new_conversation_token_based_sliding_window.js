@@ -5,17 +5,13 @@ import { parse_command, create_conversation_record, tail_conversation, print_out
 import { generate_content_using_http, sliding_window_size, conversation_token_limit, count_tokens } from "../ai_model.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
+import { embed_content } from "../ai_model.js";
+import { insert_document, search_documents } from "../database.js";
 
 export async function new_sliding_window_token_based_conversation(conv_name) {
 	let user_response;
-	let chat_topic;
 	let sanitize_model_response;
-
-	if (!conv_name) {
-		chat_topic = `chat ${new Date().getTime()}`;
-	} else {
-		chat_topic = `${conv_name}`;
-	}
+	let chat_topic = conv_name;
 
 	const chat_save_dir_for_user =
 		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
