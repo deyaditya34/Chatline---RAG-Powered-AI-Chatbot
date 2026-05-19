@@ -1,6 +1,3 @@
-import fs from "fs";
-import {system_instruction_message} from "./ai_model.js";
-
 // sanitize the conversation of either entity(user or model) so that the
 // conversation can be saved in the json file
 export function sanitize_conversation(data, entity) {
