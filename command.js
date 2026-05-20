@@ -21,7 +21,9 @@ import { switch_sliding_window_token_based_conversation } from "./repl/switch_co
 import {
 	mode, set_conversation_mode, current_conversation_id,
 	set_current_conversation_id_for_new_conv,
-	set_current_conversation_id_for_switch_conv
+	set_current_conversation_id_for_switch_conv,
+	set_current_convsersation_id_for_new_interaction,
+	set_current_conversation_id_for_switch_interaction
 }
 	from "./session.js";
 
@@ -84,6 +86,7 @@ export async function handle_command(command, args) {
 				set_current_conversation_id_for_new_conv(conv_name);
 				await new_sliding_window_token_based_conversation(current_conversation_id);
 			} else {
+				set_current_convsersation_id_for_new_interaction(conv_name);
 				await new_interaction(conv_name);
 			}
 			break;
@@ -94,7 +97,8 @@ export async function handle_command(command, args) {
 				await set_current_conversation_id_for_switch_conv(conv_id);
 				await switch_sliding_window_token_based_conversation(current_conversation_id);
 			} else {
-				await switch_interaction(conv_id);
+				await set_current_conversation_id_for_switch_interaction(conv_id);
+				await switch_interaction(current_conversation_id);
 			}
 			break;
 

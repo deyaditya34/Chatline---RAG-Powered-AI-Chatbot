@@ -15,6 +15,7 @@ export async function list_conversation() {
 		console.log("no existing conversation found");
 		return;
 	}
+
 	print_list(conversation_list);
 }
 

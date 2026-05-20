@@ -8,14 +8,8 @@ import user_prompts from "../prompts/default_user_prompts.json" with {type: "jso
 
 export async function new_interaction(conv_name) {
 	let user_response;
-	let chat_topic;
 	let prev_model_response_id;
-
-	if (!conv_name) {
-		chat_topic = `chat ${new Date()}`;
-	} else {
-		chat_topic = `${conv_name}`;
-	}
+	let chat_topic = conv_name;
 
 	const chat_save_dir =
 		`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
@@ -36,6 +30,7 @@ export async function new_interaction(conv_name) {
 			const [command, args] = parse_command(user_response);
 
 			await handle_command(command, args);
+			break;
 		}
 
 		const interaction_history = fs.readFileSync(`${chat_save_dir}/${chat_topic}`);

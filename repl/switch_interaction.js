@@ -9,32 +9,17 @@ import {
 } from "../utils.js";
 import { create_new_interaction, generate_content_using_http } from "../ai_model.js";
 
-export async function switch_interaction(interaction_id) {
+export async function switch_interaction(conv_name) {
 	let user_response;
 	let model_response;
 	let prev_model_version;
 	let prev_model_response_id;
 
-	if (!interaction_id) {
-		console.log("usage: /switch <id>");
-		return;
-	}
+	const fileName = conv_name;
 
 	const chat_save_dir =
 		`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
 
-	const interaction_list = await fs.readdirSync(
-		`${chat_save_dir}`
-	);
-
-	const fileNo = Number(interaction_id) - 1;
-
-	if (fileNo > interaction_list.length - 1 || !Number(interaction_id)) {
-		console.log("invalid input");
-		return;
-	}
-
-	const fileName = interaction_list[fileNo];
 	const interaction_history = fs.readFileSync(
 		`${chat_save_dir}/${fileName}`
 	);
