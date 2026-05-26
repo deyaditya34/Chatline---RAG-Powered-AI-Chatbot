@@ -1,6 +1,8 @@
 import fs from "fs";
 import { parse_command, tail_conversation } from "../utils.js";
 import { handle_command } from "../command.js";
+import { embed_content } from "../ai_model.js";
+import { search_documents } from "../database.js";
 import { read_user_input } from "../readline.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
@@ -45,6 +47,27 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 		const conversation_history_model = fs.readFileSync(`${chat_save_dir_for_model}/${fileName}`);
 		let parsed_conversation_history_model = JSON.parse(conversation_history_model.toString());
 
+		if (parsed_conversation_history_user.uploadedDocuments.length > 0) {
+			const embedding_result = await embed_content(
+				sanitize_conversation(user_response, "user")
+			);
+
+			const embedding = embedding_result.embedding.values;
+
+			const semantic_result = await search_documents(embedding, fileName, "document");
+
+			if (semantic_result.length > 0) {
+				let semantic_context = "You may use the following retrieved context: \n\n";
+
+				for (const point of semantic_result) {
+					semantic_context += point.payload.text + "\n\n";
+				}
+
+				const sanitize_semantic_context = sanitize_conversation(semantic_context, "user");
+				parsed_conversation_history_model.contents.push(sanitize_semantic_context);
+			}
+		}
+
 		parsed_conversation_history_user.contents.push(sanitize_user_response);
 		parsed_conversation_history_model.contents.push(sanitize_user_response);
 
@@ -59,7 +82,6 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 				let [model_response, model_version] = await generate_content_using_http(
 					parsed_conversation_history_model.contents
 				);
-				console.log("model response -", model_response);
 
 				sanitize_model_response = sanitize_conversation(model_response, "user");
 				parsed_conversation_history_model.contents = [];
