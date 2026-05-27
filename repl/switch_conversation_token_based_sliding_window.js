@@ -1,8 +1,9 @@
 import fs from "fs";
+import { v4 as uuidv4 } from "uuid";
 import { parse_command, tail_conversation } from "../utils.js";
 import { handle_command } from "../command.js";
 import { embed_content } from "../ai_model.js";
-import { search_documents } from "../database.js";
+import { insert_document, search_documents } from "../database.js";
 import { read_user_input } from "../readline.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
@@ -13,6 +14,9 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 	let user_response;
 	let model_response;
 	let sanitize_model_response;
+	let user_prompt_embedding;
+	let model_response_embedding;
+	let token_limit_exceeded_once;
 
 	const chat_save_dir_for_user =
 		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
@@ -47,14 +51,13 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 		const conversation_history_model = fs.readFileSync(`${chat_save_dir_for_model}/${fileName}`);
 		let parsed_conversation_history_model = JSON.parse(conversation_history_model.toString());
 
+		const user_prompt_embedding_result = await embed_content(
+			sanitize_conversation(user_response, "user")
+		);
+		user_prompt_embedding = user_prompt_embedding_result.embedding.values;
+
 		if (parsed_conversation_history_user.uploadedDocuments.length > 0) {
-			const embedding_result = await embed_content(
-				sanitize_conversation(user_response, "user")
-			);
-
-			const embedding = embedding_result.embedding.values;
-
-			const semantic_result = await search_documents(embedding, fileName, "document");
+			const semantic_result = await search_documents(user_prompt_embedding, fileName, "document");
 
 			if (semantic_result.length > 0) {
 				let semantic_context = "You may use the following retrieved context: \n\n";
@@ -68,12 +71,25 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 			}
 		}
 
+		if (parsed_conversation_history_user.token_limit_exceeded_once) {
+			const semantic_result = await search_documents(user_prompt_embedding, fileName, "conversation");
+
+			if (semantic_result.length > 0) {
+				for (const point of semantic_result) {
+					const sanitize_semantic_context = sanitize_conversation(point.payload.text, point.payload.role);
+					parsed_conversation_history_model.contents.push(sanitize_semantic_context);
+				}
+			}
+		}
+
 		parsed_conversation_history_user.contents.push(sanitize_user_response);
 		parsed_conversation_history_model.contents.push(sanitize_user_response);
 
 		let token_consumed = await count_tokens(parsed_conversation_history_model.contents);
 
 		if (token_consumed.totalTokens >= conversation_token_limit) {
+			parsed_conversation_history_user.token_limit_exceeded_once = true;
+
 			parsed_conversation_history_model.contents.pop();
 			const sanitize_ai_summarize_prompt = sanitize_conversation(ai_prompts.summarize_user_conv_prompt, "user");
 			parsed_conversation_history_model.contents.push(sanitize_ai_summarize_prompt);
@@ -83,9 +99,18 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 					parsed_conversation_history_model.contents
 				);
 
-				sanitize_model_response = sanitize_conversation(model_response, "user");
+				sanitize_model_response = sanitize_conversation(model_response, "model");
 				parsed_conversation_history_model.contents = [];
 				parsed_conversation_history_model.contents.push(sanitize_model_response);
+
+				const semantic_result = await search_documents(user_prompt_embedding, fileName, "conversation");
+				if (semantic_result.length > 0) {
+					for (const point of semantic_result) {
+						const sanitize_semantic_context = sanitize_conversation(point.payload.text, point.payload.role);
+						parsed_conversation_history_model.contents.push(sanitize_semantic_context);
+					}
+				}
+
 				parsed_conversation_history_model.contents.push(sanitize_ai_summarize_prompt);
 
 				token_consumed = await count_tokens(parsed_conversation_history_model.contents);
@@ -104,8 +129,47 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 			prev_model_version
 		);
 
-		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversations");
 		sanitize_model_response = sanitize_conversation(model_response, "model");
+
+		let model_response_embedding_result = await embed_content(sanitize_model_response);
+		model_response_embedding = model_response_embedding_result.embedding.values;
+
+		let user_prompt_chunk_payload = {
+			text: user_response,
+			conversation_id: fileName,
+			source_type: "conversation",
+			role: "user",
+			uploaded_at: Date.now(),
+		}
+
+		let model_response_chunk_payload = {
+			text: model_response,
+			conversation_id: fileName,
+			source_type: "conversation",
+			role: "model",
+			uploaded_at: Date.now()
+		}
+
+		try {
+			await insert_document(
+				{
+					embedding: user_prompt_embedding,
+					payload: user_prompt_chunk_payload
+				}
+			);
+
+			await insert_document(
+				{
+					embedding: model_response_embedding,
+					payload: model_response_chunk_payload
+				}
+			);
+		} catch (err) {
+			console.error("err in storing the conversations as vectors -", err);
+			return;
+		}
+
+		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversations");
 
 		parsed_conversation_history_user.contents.push(sanitize_model_response);
 		parsed_conversation_history_user.model_version = model_version;
