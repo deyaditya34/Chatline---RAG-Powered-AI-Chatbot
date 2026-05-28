@@ -52,6 +52,7 @@ export async function embed_document(doc_path, conv_id) {
 					conversation_id: chat_topic,
 					source_type: document_details.source_type,
 					document_id: document_details.document_id,
+					uploaded_at: document_details.uploaded_at,
 					text: paragraph,
 					embedding: embedding
 				}
@@ -63,7 +64,8 @@ export async function embed_document(doc_path, conv_id) {
 							text: chunk_details.text,
 							conversation_id: chunk_details.conversation_id,
 							document_id: chunk_details.document_id,
-							source_type: chunk_details.source_type
+							source_type: chunk_details.source_type,
+							uploaded_at: chunk_details.uploaded_at
 						}
 					}
 				)
