@@ -42,6 +42,7 @@ export async function print_help_command() {
 	console.log("\t/load\t\t\t\tLoad chat");
 	console.log("\t/delete <id>\t\t\tDelete chat");
 	console.log("\t/list\t\t\t\tList chat");
+	console.log("\t/embed <doc_path>\t\tUpload document");
 	process.stdout.write("\x1B[0m");	
 
 	console.log("\n");
@@ -51,6 +52,7 @@ export async function print_help_command() {
 	process.stdout.write("\x1B[0m");	
 
 	process.stdout.write("\x1B[38;2;160;160;220m");
+	console.log("\t/status\t\t\t\tCurrent status");
 	console.log("\t/conversation_mode <type>\tsdk | rest | interactions");
 	console.log("\t/clear\t\t\t\tClear screen");
 	console.log("\t/help\t\t\t\tShow help");
