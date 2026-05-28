@@ -26,8 +26,10 @@ import {
 	set_current_conversation_id_for_switch_interaction
 }
 	from "./session.js";
-
+import { embed_document } from "./repl/embed_document.js";
 import { ai, ai_model_list } from "./ai_model.js";
+import { search_document } from "./repl/search_document.js";
+import { delete_collection } from "./repl/delete_collection.js";
 
 export async function handle_command(command, args) {
 	let conv_name;
@@ -74,10 +76,6 @@ export async function handle_command(command, args) {
 			message = args.join(" ");
 			const response = await one_time_chat(message);
 			print_output(response, process.env.MODEL_DISPLAY_NAME, "conversations");
-			break;
-
-		case "stream":
-			message = args.join(" ");
 			break;
 
 		case "new":
@@ -137,8 +135,22 @@ export async function handle_command(command, args) {
 			}
 			break;
 
+		case "embed":
+			const doc_path = args[0];
+			await embed_document(doc_path, current_conversation_id);
+			break;
+
+		case "search":
+			const doc_search = args[0];
+			await search_document(doc_search);
+			break;
+
 		case "exit":
 			process.exit(0);
+			break;
+	
+		case "delete_coll":
+			await delete_collection();
 			break;
 
 		default:
