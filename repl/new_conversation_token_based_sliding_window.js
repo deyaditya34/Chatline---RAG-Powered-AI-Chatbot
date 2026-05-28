@@ -1,12 +1,17 @@
 import fs from "fs";
 import { handle_command } from "../command.js";
 import { read_user_input } from "../readline.js";
-import { parse_command, create_conversation_record, tail_conversation, print_output, sanitize_conversation } from "../utils.js";
-import { generate_content_using_http, sliding_window_size, conversation_token_limit, count_tokens } from "../ai_model.js";
+import {
+	parse_command, create_conversation_record, tail_conversation,
+	print_output, sanitize_conversation
+} from "../utils.js";
+import { insert_document, search_documents } from "../database.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
-import { embed_content } from "../ai_model.js";
-import { insert_document, search_documents } from "../database.js";
+import {
+	generate_content_using_http, sliding_window_size,
+	conversation_token_limit, count_tokens, embed_content
+} from "../ai_model.js";
 
 export async function new_sliding_window_token_based_conversation(conv_name) {
 	let user_response;
@@ -50,9 +55,27 @@ export async function new_sliding_window_token_based_conversation(conv_name) {
 		parsed_conversation_history_user.contents.push(sanitize_user_response);
 		parsed_conversation_history_model.contents.push(sanitize_user_response);
 
+		const user_prompt_embedding_result = await embed_content(
+			sanitize_conversation(user_response, "user")
+		);
+		user_prompt_embedding = user_prompt_embedding_result.embedding.values;
+
+		if (parsed_conversation_history_user.token_limit_exceeded_once) {
+			const semantic_result = await search_documents(user_prompt_embedding, chat_topic, "conversation");
+
+			if (semantic_result.length > 0) {
+				for (const point of semantic_result) {
+					const sanitize_semantic_context = sanitize_conversation(point.payload.text, point.payload.role);
+					parsed_conversation_history_model.contents.push(sanitize_semantic_context);
+				}
+			}
+		}
+
 		let token_consumed = await count_tokens(parsed_conversation_history_model.contents);
 
 		if (token_consumed.totalTokens >= conversation_token_limit) {
+			parsed_conversation_history_user.token_limit_exceeded_once = true;
+
 			parsed_conversation_history_model.contents.pop();
 			const sanitize_ai_summarize_prompt = sanitize_conversation(ai_prompts.summarize_user_conv_prompt, "user");
 			parsed_conversation_history_model.contents.push(sanitize_ai_summarize_prompt);
@@ -65,6 +88,15 @@ export async function new_sliding_window_token_based_conversation(conv_name) {
 				sanitize_model_response = sanitize_conversation(model_response, "user");
 				parsed_conversation_history_model.contents = [];
 				parsed_conversation_history_model.contents.push(sanitize_model_response);
+
+				const semantic_result = await search_documents(user_prompt_embedding, chat_topic, "conversation");
+				if (semantic_result.length > 0) {
+					for (const point of semantic_result) {
+						const sanitize_semantic_context = sanitize_conversation(point.payload.text, point.payload.role);
+						parsed_conversation_history_model.contents.push(sanitize_semantic_context);
+					}
+				}
+
 				parsed_conversation_history_model.contents.push(sanitize_ai_summarize_prompt);
 
 				token_consumed = await count_tokens(parsed_conversation_history_model.contents);
@@ -80,8 +112,48 @@ export async function new_sliding_window_token_based_conversation(conv_name) {
 		let [model_response, model_version] = await generate_content_using_http(
 			parsed_conversation_history_model.contents
 		);
-		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversations");
+
 		sanitize_model_response = sanitize_conversation(model_response, "model");
+
+		let model_response_embedding_result = await embed_content(sanitize_model_response);
+		model_response_embedding = model_response_embedding_result.embedding.values;
+
+		let user_prompt_chunk_payload = {
+			text: user_response,
+			conversation_id: chat_topic,
+			source_type: "conversation",
+			role: "user",
+			uploaded_at: Date.now(),
+		}
+
+		let model_response_chunk_payload = {
+			text: model_response,
+			conversation_id: chat_topic,
+			source_type: "conversation",
+			role: "model",
+			uploaded_at: Date.now()
+		}
+
+		try {
+			await insert_document(
+				{
+					embedding: user_prompt_embedding,
+					payload: user_prompt_chunk_payload
+				}
+			);
+
+			await insert_document(
+				{
+					embedding: model_response_embedding,
+					payload: model_response_chunk_payload
+				}
+			);
+		} catch (err) {
+			console.error("err in storing the conversations as vectors -", err);
+			return;
+		}
+
+		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversations");
 
 		parsed_conversation_history_user.contents.push(sanitize_model_response);
 		parsed_conversation_history_user.model_version = model_version;

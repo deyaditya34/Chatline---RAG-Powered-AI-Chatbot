@@ -1,14 +1,17 @@
 import fs from "fs";
-import { v4 as uuidv4 } from "uuid";
-import { parse_command, tail_conversation } from "../utils.js";
 import { handle_command } from "../command.js";
-import { embed_content } from "../ai_model.js";
-import { insert_document, search_documents } from "../database.js";
 import { read_user_input } from "../readline.js";
+import {
+	parse_command, tail_conversation,
+	sanitize_conversation, sanitize_and_print_conversation, print_output
+} from "../utils.js";
+import { insert_document, search_documents } from "../database.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
-import { sanitize_conversation, sanitize_and_print_conversation, print_output } from "../utils.js";
-import { generate_content_using_http, sliding_window_size, conversation_token_limit, count_tokens } from "../ai_model.js";
+import {
+	generate_content_using_http, sliding_window_size, conversation_token_limit,
+	count_tokens, embed_content
+} from "../ai_model.js";
 
 export async function switch_sliding_window_token_based_conversation(conv_name) {
 	let user_response;
