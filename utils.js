@@ -32,6 +32,8 @@ export function create_conversation_record() {
 	result.contents = [];
 	result.chat_turns = 0;
 	result.chat_starting_index = 0;
+	result.token_limit_exceeded_once = false;
+	result.uploadedDocuments = [];
 
 	return result;
 }
@@ -90,6 +92,9 @@ export function print_output(message, entity, job) {
 		console.log(`\x1B[38;2;255;180;180m[${entity}]: \x1B[0m`);
 		console.table(result);
 	}
+	else if (job === "embedding") {
+		console.log(`\x1B[38;2;255;180;180m[${entity}]: ${message}\x1B[0m`);
+	}
 }
 
 export function sanitize_and_print_conversation(conversation) {
@@ -146,3 +151,4 @@ export function tail_conversation(contents, content_starting_index) {
 
 	return result;
 }
+
