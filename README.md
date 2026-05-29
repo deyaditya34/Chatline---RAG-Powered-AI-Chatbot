@@ -68,19 +68,6 @@ A lightweight, privacy-focused CLI for interacting with large language models an
     - model interaction
     - command handling
 
-## Installation
-
-Prerequisites
-- Node.js 16+ (LTS recommended)
-- npm, Yarn, or pnpm (package manager of choice)
-
-Install from npm (if published)
-```
-npm install -g gemini-cli
-# or using npx without global install:
-npx gemini-cli init
-```
-
 ## Quick start
 
 # Copy the **".env.example"** file and rename it as **".env"**. Modify the values as needed per requirements.
