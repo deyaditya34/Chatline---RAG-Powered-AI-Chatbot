@@ -17,7 +17,7 @@ export async function print_help_command() {
 
 	process.stdout.write("\x1B[38;2;160;160;220m");
 	console.log("\t/chat <msg>\t\t\tOne-shot request");
-	console.log("\t/stream <msg>\t\t\tStream response");
+	console.log("\t/guest_chat\t\t\tAnonymous chat");
 	process.stdout.write("\x1B[0m");	
 
 	console.log("\n");
@@ -53,7 +53,7 @@ export async function print_help_command() {
 
 	process.stdout.write("\x1B[38;2;160;160;220m");
 	console.log("\t/status\t\t\t\tCurrent status");
-	console.log("\t/conversation_mode <type>\tsdk | rest | interactions");
+	console.log("\t/conversation_mode <type>\trest | interactions");
 	console.log("\t/clear\t\t\t\tClear screen");
 	console.log("\t/help\t\t\t\tShow help");
 	console.log("\t/exit\t\t\t\tQuit");

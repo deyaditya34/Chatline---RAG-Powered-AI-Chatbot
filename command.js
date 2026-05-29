@@ -2,12 +2,12 @@ import { print_help_command } from "./repl/help.js";
 import { change_ai_model } from "./repl/model_set.js";
 import { get_model_info } from "./repl/model_info.js";
 import { one_time_chat } from "./repl/one_time_chat.js";
-import { new_conversation } from "./repl/new_conversation.js";
+import { new_conversation_guest } from "./repl/new_conversation_guest.js";
 import { switch_conversation } from "./repl/switch_conversation.js";
 import { conversation_history } from "./repl/conversation_history.js";
 import { list_conversation } from "./repl/list_conversations.js";
 import { delete_conversation } from "./repl/delete_conversation.js";
-import { new_interaction } from "./repl/new_interaction.js";
+import { new_interaction_guest } from "./repl/new_interaction_guest.js";
 import { interaction_history } from "./repl/interaction_history.js";
 import { switch_interaction } from "./repl/switch_interaction.js";
 import { list_interaction } from "./repl/list_interactions.js";
@@ -78,6 +78,14 @@ export async function handle_command(command, args) {
 			print_output(response, process.env.MODEL_DISPLAY_NAME, "conversations");
 			break;
 
+		case "guest_chat":
+			if (mode === "rest") {
+				await new_conversation_guest();
+			} else {
+				await new_interaction_guest();
+			}
+			break;
+
 		case "new":
 			conv_name = args.join(" ");
 			if (mode === "rest") {
@@ -111,7 +119,7 @@ export async function handle_command(command, args) {
 
 		case "conversation_mode":
 			const user_input = args[0];
-			if (args[0] === "sdk" || args[0] === "rest" || args[0] === "interactions") {
+			if (args[0] === "rest" || args[0] === "interactions") {
 				set_conversation_mode(args[0]);
 			} else {
 				console.log("invalid_user_input");
@@ -140,6 +148,10 @@ export async function handle_command(command, args) {
 			await embed_document(doc_path, current_conversation_id);
 			break;
 
+		case "clear":
+			console.clear();
+			break;
+
 		case "search":
 			const doc_search = args[0];
 			await search_document(doc_search);
@@ -148,7 +160,7 @@ export async function handle_command(command, args) {
 		case "exit":
 			process.exit(0);
 			break;
-	
+
 		case "delete_coll":
 			await delete_collection();
 			break;
