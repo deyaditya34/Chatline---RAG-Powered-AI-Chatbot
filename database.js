@@ -1,6 +1,6 @@
 import fs from "fs";
 import { QdrantClient } from "@qdrant/js-client-rest";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 const qdrant = new QdrantClient({
 	url: "http://localhost:6333"
@@ -75,9 +75,9 @@ export async function scroll_document() {
 
 }
 
-export async function delete_document() {
+export async function delete_document(criteria = {}) {
 	const result = await qdrant.delete(process.env.DATABASE_COLLECTION_NAME, {
-		filter: {}
+		filter: criteria
 	});
 
 	return result;
