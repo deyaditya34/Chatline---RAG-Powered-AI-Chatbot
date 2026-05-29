@@ -26,7 +26,6 @@ export async function embed_document(doc_path, conv_id) {
 		file_name: doc_path,
 		document_id: uuidv4(),
 		uploaded_at: Date.now(),
-		source_type: "document"
 	}
 
 	parsed_conversation_history_user.uploadedDocuments.push(document_details);
@@ -50,7 +49,7 @@ export async function embed_document(doc_path, conv_id) {
 
 				let chunk_details = {
 					conversation_id: chat_topic,
-					source_type: document_details.source_type,
+					source_type: "document",
 					document_id: document_details.document_id,
 					uploaded_at: document_details.uploaded_at,
 					text: paragraph,
@@ -84,9 +83,10 @@ export async function embed_document(doc_path, conv_id) {
 		let chunk_details = {
 			conversation_id: chat_topic,
 			document_id: document_details.document_id,
+			uploaded_at: document_details.uploaded_at,
 			text: paragraph,
 			embedding: embedding,
-			source_type: document_details.source_type
+			source_type: "document"
 		}
 
 		const document_insert = await insert_document(
@@ -96,7 +96,8 @@ export async function embed_document(doc_path, conv_id) {
 					text: chunk_details.text,
 					conversation_id: chunk_details.conversation_id,
 					document_id: chunk_details.document_id,
-					source_type: chunk_details.source_type
+					source_type: chunk_details.source_type,
+					uploaded_at: chunk_details.uploaded_at
 				}
 			}
 		)
@@ -113,24 +114,3 @@ export async function embed_document(doc_path, conv_id) {
 	);
 }
 
-
-//const document_search = await search_documents(embedding);
-
-//console.log("insert document result -", document_search);
-
-/*
-TO DO
---------
-1. user asks the model
-2. conversation create
-3. save the user prompt
-4. reply as usual till the token limit is reached or the user doesn't upload a file
-5. once step 4 happens
-
-1. entire conversation or the uploaded file is embedded and converted to vector
-2. user asks the model
-3. user query converted to embedding
-4. the embedding is used to search in the vector DB for semantic data
-5. the semantic data along with the user prompt is sent to the ai model
-6. ai model response is to be saved and the normal process will continue till the token limit is reached again
-*/
