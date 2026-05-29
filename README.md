@@ -1,4 +1,4 @@
-# gemini_cli
+# Chatline
 
 A lightweight, privacy-focused CLI for interacting with large language models and managing conversational context. Designed for Retrieval-Augmented Generation (RAG) with uploaded documents and past conversations, plus automatic summarization to reduce token usage.
 
