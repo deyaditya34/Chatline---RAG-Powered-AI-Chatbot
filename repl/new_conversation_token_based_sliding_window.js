@@ -17,6 +17,8 @@ export async function new_sliding_window_token_based_conversation(conv_name) {
 	let user_response;
 	let sanitize_model_response;
 	let chat_topic = conv_name;
+	let user_prompt_embedding;
+	let model_response_embedding;
 
 	const chat_save_dir_for_user =
 		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
