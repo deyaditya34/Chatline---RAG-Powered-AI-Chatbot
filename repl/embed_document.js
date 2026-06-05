@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import readline from "readline";
 import { embed_content } from "../ai_model.js";
 import { print_output, sanitize_conversation } from "../utils.js";
-import { insert_document } from "../database.js";
+import { insert_document } from "../databases/qdrant.js";
 
 export async function embed_document(doc_path, conv_id) {
 	const chat_topic = conv_id;

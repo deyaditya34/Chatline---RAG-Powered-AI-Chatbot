@@ -1,4 +1,4 @@
-import { delete_document } from "../database.js";
+import { delete_document } from "../databases/qdrant.js";
 
 export async function delete_collection() {
 	let result;

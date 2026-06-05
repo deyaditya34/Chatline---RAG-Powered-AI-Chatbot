@@ -1,7 +1,7 @@
 import fs from "fs";
 import { read_user_input } from "../readline.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
-import { delete_document } from "../database.js";
+import { delete_document } from "../databases/qdrant.js";
 
 export async function delete_conversation(conv_id) {
 	if (!conv_id || !Number(conv_id)) {

@@ -41,6 +41,17 @@ export async function insert_document(document) {
 	return result;
 }
 
+export async function search_collection(embedding) {
+	const result = await qdrant.search(process.env.DATABASE_COLLECTION_NAME,
+		{
+			vector: embedding,
+			filter: {}
+		}
+	)
+
+	return result;
+};
+
 export async function search_documents(embedding, conversation_id, source_type) {
 	const result = await qdrant.search(process.env.DATABASE_COLLECTION_NAME,
 		{

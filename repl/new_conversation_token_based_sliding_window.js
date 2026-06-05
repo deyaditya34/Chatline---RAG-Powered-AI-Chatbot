@@ -5,7 +5,7 @@ import {
 	parse_command, create_conversation_record, tail_conversation,
 	print_output, sanitize_conversation
 } from "../utils.js";
-import { insert_document, search_documents } from "../database.js";
+import { insert_document, search_documents } from "../databases/qdrant.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
 import {
