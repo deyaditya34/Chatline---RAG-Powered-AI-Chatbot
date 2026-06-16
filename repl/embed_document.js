@@ -4,6 +4,7 @@ import readline from "readline";
 import { embed_content } from "../ai_model.js";
 import { print_output, sanitize_conversation } from "../utils.js";
 import { insert_document } from "../databases/qdrant.js";
+import * as elastic_search from "../databases/elastic_search.js";
 
 export async function embed_document(doc_path, conv_id) {
 	const chat_topic = conv_id;
@@ -69,6 +70,14 @@ export async function embed_document(doc_path, conv_id) {
 					}
 				)
 
+				const elastic_db_insert = await elastic_search.insert_document({
+					text: chunk_details.text,
+					conversation_id: chat_topic,
+					source_type: "document",
+					document_id: chunk_details.document_id,
+					uploaded_at: chunk_details.uploaded_at,
+				})
+
 				paragraph = "";
 			}
 		} else {
@@ -101,6 +110,14 @@ export async function embed_document(doc_path, conv_id) {
 				}
 			}
 		)
+
+		const elastic_db_insert = await elastic_search.insert_document({
+			text: chunk_details.text,
+			conversation_id: chat_topic,
+			source_type: "document",
+			document_id: chunk_details.document_id,
+			uploaded_at: chunk_details.uploaded_at,
+		})
 	}
 
 	print_output(
