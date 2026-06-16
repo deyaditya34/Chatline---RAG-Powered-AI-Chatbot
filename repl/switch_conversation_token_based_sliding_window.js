@@ -5,7 +5,8 @@ import {
 	parse_command, tail_conversation,
 	sanitize_conversation, sanitize_and_print_conversation, print_output
 } from "../utils.js";
-import { insert_document, search_documents } from "../database.js";
+import { insert_document, search_documents } from "../databases/qdrant.js";
+import * as elastic_search from "../databases/elastic_search.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
 import {
@@ -64,13 +65,23 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 
 			if (semantic_result.length > 0) {
 				let semantic_context = "You may use the following retrieved context: \n\n";
-
 				for (const point of semantic_result) {
 					semantic_context += point.payload.text + "\n\n";
 				}
-
 				const sanitize_semantic_context = sanitize_conversation(semantic_context, "user");
 				parsed_conversation_history_model.contents.push(sanitize_semantic_context);
+			}
+
+			const elastic_search_result = await elastic_search.
+				search_in_uploaded_docs(user_response, fileName);
+
+			if (elastic_search_result.length > 0) {
+				let elastic_context = "You may use the following retrieved context: \n\n";
+				for (const result of elastic_search_result) {
+					elastic_context += result._source.text + "\n\n";
+				}
+				const sanitize_elastic_context = sanitize_conversation(elastic_context, "user");
+				parsed_conversation_history_model.contents.push(sanitize_elastic_context);
 			}
 		}
 
@@ -81,6 +92,18 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 				for (const point of semantic_result) {
 					const sanitize_semantic_context = sanitize_conversation(point.payload.text, point.payload.role);
 					parsed_conversation_history_model.contents.push(sanitize_semantic_context);
+				}
+			}
+
+			const elastic_search_result = await elastic_search.search_in_past_conversation(
+				user_response,
+				chat_topic
+			);
+
+			if (elastic_search_result.length > 0) {
+				for (const result of elastic_search_result) {
+					const sanitize_elastic_context = sanitize_conversation(result._source.text, result._source.role);
+					parsed_conversation_history_model.contents.push(sanitize_elastic_context);
 				}
 			}
 		}
@@ -111,6 +134,18 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 					for (const point of semantic_result) {
 						const sanitize_semantic_context = sanitize_conversation(point.payload.text, point.payload.role);
 						parsed_conversation_history_model.contents.push(sanitize_semantic_context);
+					}
+				}
+
+				const elastic_search_result = await elastic_search.search_in_past_conversation(
+					user_response,
+					fileName
+				);
+
+				if (elastic_search_result.length > 0) {
+					for (const result of elastic_search_result) {
+						const sanitize_elastic_context = sanitize_conversation(result._source.text, result._source.role);
+						parsed_conversation_history_model.contents.push(sanitize_elastic_context);
 					}
 				}
 
@@ -170,6 +205,30 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 		} catch (err) {
 			console.error("err in storing the conversations as vectors -", err);
 			return;
+		}
+
+		try {
+			await elastic_search.insert_document(
+				{
+					text: user_response,
+					conversation_id: fileName,
+					source_type: "conversation",
+					role: "user",
+					uploaded_at: Date.now()
+				}
+			);
+
+			await elastic_search.insert_document(
+				{
+					text: model_response,
+					conversation_id: fileName,
+					source_type: "conversation",
+					role: "model",
+					uploaded_at: Date.now()
+				}
+			);
+		} catch (err) {
+			console.error("err in storing the conversations as elastic search -", err);
 		}
 
 		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversations");

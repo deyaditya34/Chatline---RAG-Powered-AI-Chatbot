@@ -5,13 +5,14 @@ import {
 	parse_command, create_conversation_record, tail_conversation,
 	print_output, sanitize_conversation
 } from "../utils.js";
-import { insert_document, search_documents } from "../databases/qdrant.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
 import {
 	generate_content_using_http, sliding_window_size,
 	conversation_token_limit, count_tokens, embed_content
 } from "../ai_model.js";
+import { insert_document, search_documents } from "../databases/qdrant.js";
+import * as elastic_search from "../databases/elastic_search.js";
 
 export async function new_sliding_window_token_based_conversation(conv_name) {
 	let user_response;
@@ -54,9 +55,6 @@ export async function new_sliding_window_token_based_conversation(conv_name) {
 		let parsed_conversation_history_user = JSON.parse(conversation_history_user.toString());
 		let parsed_conversation_history_model = JSON.parse(conversation_history_model.toString());
 
-		parsed_conversation_history_user.contents.push(sanitize_user_response);
-		parsed_conversation_history_model.contents.push(sanitize_user_response);
-
 		const user_prompt_embedding_result = await embed_content(
 			sanitize_conversation(user_response, "user")
 		);
@@ -71,7 +69,22 @@ export async function new_sliding_window_token_based_conversation(conv_name) {
 					parsed_conversation_history_model.contents.push(sanitize_semantic_context);
 				}
 			}
+
+			const elastic_search_result = await elastic_search.search_in_past_conversation(
+				user_response,
+				chat_topic
+			);
+
+			if (elastic_search_result.length > 0) {
+				for (const result of elastic_search_result) {
+					const sanitize_elastic_context = sanitize_conversation(result._source.text, result._source.role);
+					parsed_conversation_history_model.contents.push(sanitize_elastic_context);
+				}
+			}
 		}
+
+		parsed_conversation_history_user.contents.push(sanitize_user_response);
+		parsed_conversation_history_model.contents.push(sanitize_user_response);
 
 		let token_consumed = await count_tokens(parsed_conversation_history_model.contents);
 
@@ -99,6 +112,18 @@ export async function new_sliding_window_token_based_conversation(conv_name) {
 					}
 				}
 
+				const elastic_search_result = await elastic_search.search_in_past_conversation(
+					user_response,
+					chat_topic
+				);
+
+				if (elastic_search_result.length > 0) {
+					for (const result of elastic_search_result) {
+						const sanitize_elastic_context = sanitize_conversation(result._source.text, result._source.role);
+						parsed_conversation_history_model.contents.push(sanitize_elastic_context);
+					}
+				}
+				
 				parsed_conversation_history_model.contents.push(sanitize_ai_summarize_prompt);
 
 				token_consumed = await count_tokens(parsed_conversation_history_model.contents);
@@ -153,6 +178,30 @@ export async function new_sliding_window_token_based_conversation(conv_name) {
 		} catch (err) {
 			console.error("err in storing the conversations as vectors -", err);
 			return;
+		}
+
+		try {
+			await elastic_search.insert_document(
+				{
+					text: user_response,
+					conversation_id: chat_topic,
+					source_type: "conversation",
+					role: "user",
+					uploaded_at: Date.now()
+				}
+			);
+
+			await elastic_search.insert_document(
+				{
+					text: model_response,
+					conversation_id: chat_topic,
+					source_type: "conversation",
+					role: "model",
+					uploaded_at: Date.now()
+				}
+			);
+		} catch (err) {
+			console.error("err in storing the conversations as elastic search -", err);
 		}
 
 		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversations");
