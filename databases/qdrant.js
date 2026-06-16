@@ -6,21 +6,21 @@ const qdrant = new QdrantClient({
 	url: "http://localhost:6333"
 });
 
-export async function create_collection() {
+export async function create_collection(collection_name) {
 	const collections = await qdrant.getCollections();
 
 	if (collections.collections.length > 0) {
-		console.log("initialized database")
+		console.log("initialized qdrant database")
 	} else {
-		await qdrant.createCollection(process.env.DATABASE_COLLECTION_NAME, {
+		await qdrant.createCollection(collection_name, {
 			vectors: {
 				size: 3072,
 				distance: "Cosine"
 			}
 		});
 
-		console.log("collection created");
-		console.log("initialized database");
+		console.log("collection created in qdrant database");
+		console.log("initialized qdrant database");
 	}
 }
 
@@ -83,13 +83,18 @@ export async function scroll_document() {
 		limit: 100
 	});
 	console.log(JSON.stringify(result, null, 2));
-
 }
 
 export async function delete_document(criteria = {}) {
 	const result = await qdrant.delete(process.env.DATABASE_COLLECTION_NAME, {
 		filter: criteria
 	});
+
+	return result;
+}
+
+export async function delete_collection() {
+	const result = await qdrant.deleteCollection(process.env.DATABASE_COLLECTION_NAME);
 
 	return result;
 }
