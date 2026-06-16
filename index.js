@@ -4,6 +4,8 @@ import { handle_command } from "./command.js";
 import { parse_command } from "./utils.js";
 import { read_user_input } from "./readline.js";
 import user_prompts from "./prompts/default_user_prompts.json" with {type: "json"};
+import * as qdrant from "./databases/qdrant.js";
+import * as elastic_search from "./databases/elastic_search.js";
 
 dotenv.config();
 
@@ -39,6 +41,9 @@ async function main() {
 		fs.mkdirSync(
 			`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_TOKEN_BASED_SLIDING_DIR}`);
 	}
+
+	await qdrant.create_collection(process.env.DATABASE_COLLECTION_NAME);
+	await elastic_search.create_index(process.env.ELASTIC_DB_COLLECTION_NAME);
 
 	while (running) {
 		let input = await read_user_input(process.env.USER_DISPLAY_NAME);
