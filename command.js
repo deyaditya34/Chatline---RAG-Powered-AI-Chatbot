@@ -28,8 +28,8 @@ import {
 	from "./session.js";
 import { embed_document } from "./repl/embed_document.js";
 import { ai, ai_model_list } from "./ai_model.js";
-import { search_document } from "./repl/search_document.js";
-import { delete_collection } from "./repl/delete_collection.js";
+import { delete_coll } from "./repl/delete_collection.js";
+import * as elastic_search from "./databases/elastic_search.js";
 
 export async function handle_command(command, args) {
 	let conv_name;
@@ -152,17 +152,13 @@ export async function handle_command(command, args) {
 			console.clear();
 			break;
 
-		case "search":
-			const doc_search = args[0];
-			await search_document(doc_search);
-			break;
-
 		case "exit":
 			process.exit(0);
 			break;
 
 		case "delete_coll":
-			await delete_collection();
+			await delete_coll();
+			await elastic_search.delete_index(process.env.ELASTIC_DB_COLLECTION_NAME);
 			break;
 
 		default:
