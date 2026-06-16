@@ -8,17 +8,22 @@ A lightweight, privacy-focused CLI for interacting with large language models an
     - Interactive terminal-based chat experience
     - Command-driven workflow for conversations and document operations
     
-- RAG on uploaded documents
-    - Ingest local files and embed them into a vector database.
+- Hybrid RAG on uploaded documents
+    - Ingest local files and embed them into both vector database and keyword
+      search indexes.
     - Automatic paragraph-based chunking and embedding pipeline.
-    - Semantic retrieval scoped per conversation.
+    - Semantic retrieval using Qdrant vector search.
+    - Keyword retrieval using Elasticsearch BM25 search.
+    - Hybrid retrieval combining semantic and exact-match results.
     - UUID-based document tracking and deletion support. 
 
-- RAG on past conversations
-    - Store user prompts and model responses as vector embeddings
-    - Retrieve semantically relevant past conversations dynamically
-    - Role-aware reconstruction of retrieved context (user / model)
-    - Long-term semantic memory beyond token limits
+- Hybrid RAG on past conversations
+    - Store user prompts and model responses as vector embeddings.
+    - Store conversational messages in Elasticsearch for Keyword retrieval.
+    - Retrieve semantically relevant past conversations dynamically.
+    - Keyword retrieval using Elasticsearch BM25 search.
+    - Role-aware reconstruction of retrieved context (user / model).
+    - Long-term semantic memory beyond token limits.
 
 - Sliding-window memory architecture
     - Persistent chronological conversation history
