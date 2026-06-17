@@ -44,6 +44,11 @@ export function create_interaction_record() {
 	return result;
 }
 
+export function print_message(message) {
+	process.stdout.write(`\x1B[38;2;255;180;180m[Model]: ${message}`);
+	process.stdout.write(`\x1B[0m\n`);
+}
+
 export function print_output(message, entity, job) {
 	if (job === "conversations" || job === "interactions") {
 		const [first_line, ...rest] = message.split("\n");

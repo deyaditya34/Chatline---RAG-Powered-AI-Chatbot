@@ -12,7 +12,7 @@ import { interaction_history } from "./repl/interaction_history.js";
 import { switch_interaction } from "./repl/switch_interaction.js";
 import { list_interaction } from "./repl/list_interactions.js";
 import { delete_interaction } from "./repl/delete_interaction.js";
-import { print_output } from "./utils.js";
+import { print_output, print_message } from "./utils.js";
 import { print_current_status } from "./repl/current_status.js";
 import { new_sliding_window_conversation } from "./repl/new_conversation_fixed_sliding_window.js";
 import { switch_sliding_window_conversation } from "./repl/switch_conversation_fixed_sliding_window.js";
@@ -27,7 +27,13 @@ import {
 }
 	from "./session.js";
 import { embed_document } from "./repl/embed_document.js";
-import { ai, ai_model_list } from "./ai_model.js";
+import { 
+	ai, 
+	ai_model_list, 
+	set_system_instruction_message, 
+	set_conversation_token_limit,
+	set_embedding_model
+} from "./ai_model.js";
 import { delete_coll } from "./repl/delete_collection.js";
 import * as elastic_search from "./databases/elastic_search.js";
 
@@ -35,6 +41,7 @@ export async function handle_command(command, args) {
 	let conv_name;
 	let message;
 	let conv_id;
+	let result;
 
 	switch (command) {
 		case "help":
@@ -57,6 +64,17 @@ export async function handle_command(command, args) {
 			} else {
 				console.log("current model :", args[0]);
 			}
+			break;
+
+		case "system_instruction":
+			const message = args.join(" ");
+			set_system_instruction_message(message);
+			break;
+
+		case "token_limit":
+			const token_limit = args[0];
+			result = set_conversation_token_limit(token_limit);
+			print_message(result);
 			break;
 
 		case "model_info":

@@ -55,6 +55,7 @@ async function main() {
 
 			await handle_command(command, args);
 		}
+		console.log(`\x1B[38;2;255;180;180mType /help for commands\n\x1B[0m`)
 	}
 }
 

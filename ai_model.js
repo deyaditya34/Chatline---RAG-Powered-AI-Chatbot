@@ -21,8 +21,15 @@ export function set_ai_model(model_name) {
 	ai_model = model_name;
 }
 
-export function set_embedding_model(model_name) {
-	embedding_model = model_name;
+export function set_system_instruction_message(message) {
+	system_instruction_message = message;
+}
+
+export function set_conversation_token_limit(token_limit) {
+	if (!Number.isNaN(Number(token_limit))) {
+		conversation_token_limit = Number(token_limit);
+		return `${token_limit} is set as the conversation token limit`
+	}
 }
 
 export async function generate_content(
@@ -116,7 +123,7 @@ export async function embed_content(content, model = embedding_model) {
 				"Content-Type": "application/json",
 				"x-goog-api-key": `${process.env.GEMINI_API_KEY}`
 			},
-			data: {content}
+			data: { content }
 		})
 
 		const response = query.data;
