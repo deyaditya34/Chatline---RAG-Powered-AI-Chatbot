@@ -97,7 +97,7 @@ export async function switch_sliding_window_token_based_conversation(conv_name) 
 
 			const elastic_search_result = await elastic_search.search_in_past_conversation(
 				user_response,
-				chat_topic
+				fileName
 			);
 
 			if (elastic_search_result.length > 0) {
