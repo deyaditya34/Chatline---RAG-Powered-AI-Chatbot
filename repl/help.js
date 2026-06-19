@@ -52,6 +52,8 @@ export async function print_help_command() {
 	process.stdout.write("\x1B[0m");	
 
 	process.stdout.write("\x1B[38;2;160;160;220m");
+	console.log("\t/system_instruction <message>\tUpdates the chatbot's system prompt");
+	console.log("\t/token_limit <token_limit>\tThe Maximum conversation context size in tokens");
 	console.log("\t/status\t\t\t\tCurrent status");
 	console.log("\t/conversation_mode <type>\trest | interactions");
 	console.log("\t/clear\t\t\t\tClear screen");

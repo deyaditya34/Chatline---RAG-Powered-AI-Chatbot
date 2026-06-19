@@ -128,6 +128,25 @@ export async function search_in_past_conversation(
 	return response.hits.hits;
 }
 
+export async function delete_conversation(conversation_id) {
+	const response = await client.deleteByQuery({
+		index: process.env.ELASTIC_DB_COLLECTION_NAME,
+		query: {
+			bool: {
+				filter: [
+					{
+						term: {
+							"conversation_id.keyword": conversation_id
+						}
+					}
+				]
+			}
+		}
+	})
+
+	return response;
+}
+
 export async function delete_document(document_id) {
 	const response = await client.delete({
 		index: process.env.ELASTIC_DB_COLLECTION_NAME,

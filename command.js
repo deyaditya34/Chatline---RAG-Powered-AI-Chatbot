@@ -32,7 +32,6 @@ import {
 	ai_model_list, 
 	set_system_instruction_message, 
 	set_conversation_token_limit,
-	set_embedding_model
 } from "./ai_model.js";
 import { delete_coll } from "./repl/delete_collection.js";
 import * as elastic_search from "./databases/elastic_search.js";

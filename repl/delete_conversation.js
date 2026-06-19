@@ -2,6 +2,7 @@ import fs from "fs";
 import { read_user_input } from "../readline.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import { delete_document } from "../databases/qdrant.js";
+import * as elastic_search from "../databases/elastic_search.js";
 
 export async function delete_conversation(conv_id) {
 	if (!conv_id || !Number(conv_id)) {
@@ -30,7 +31,7 @@ export async function delete_conversation(conv_id) {
 
 	const file_content = fs.readFileSync(filePath_user);
 
-	const delete_criteria = {
+	const semantic_delete_criteria = {
 		must: [
 			{
 				key: "conversation_id",
@@ -40,7 +41,9 @@ export async function delete_conversation(conv_id) {
 			}
 		]
 	}
-	await delete_document(delete_criteria)
+	await delete_document(semantic_delete_criteria);
+
+	await elastic_search.delete_conversation(fileName);
 
 	try {
 		await fs.unlinkSync(filePath_user);
