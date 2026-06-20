@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 
 export let mode = process.env.DEFAULT_MODE;
 export let current_conversation_id;
@@ -8,12 +9,21 @@ export function set_conversation_mode(conv_mode) {
 }
 
 export function set_current_conversation_id_for_new_conv(conv_name) {
-	let chat_topic;
+	let base_name = conv_name;
+	let chat_topic = base_name;
 
 	if (!conv_name) {
 		chat_topic = `chat ${new Date().getTime()}`;
 	} else {
-		chat_topic = `${conv_name}`;
+		const chat_save_dir =
+			`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
+
+		let counter = 1;
+
+		while (fs.existsSync(path.join(chat_save_dir, chat_topic))) {
+			chat_topic = `${base_name} (${counter})`;
+			counter++;
+		};
 	}
 
 	current_conversation_id = chat_topic;
@@ -43,12 +53,21 @@ export async function set_current_conversation_id_for_switch_conv(conv_id) {
 }
 
 export function set_current_convsersation_id_for_new_interaction(conv_name) {
-	let chat_topic;
+	let base_name = conv_name;
+	let chat_topic = base_name;
 
 	if (!conv_name) {
-		chat_topic = `chat ${new Date()}`;
+		chat_topic = `chat ${new Date().getTime()}`;
 	} else {
-		chat_topic = `${conv_name}`;
+		const chat_save_dir =
+			`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
+
+		let counter = 1;
+
+		while (fs.existsSync(path.join(chat_save_dir, chat_topic))) {
+			chat_topic = `${chat_topic} (${counter})`;
+			counter++;
+		};
 	}
 
 	current_conversation_id = chat_topic;
