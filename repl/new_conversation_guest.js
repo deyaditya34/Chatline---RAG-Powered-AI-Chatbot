@@ -1,8 +1,14 @@
 import fs from "fs";
 import { handle_command } from "../command.js";
 import { read_user_input } from "../readline.js";
-import { parse_command, create_conversation_record, print_output, sanitize_conversation } from "../utils.js";
-import { generate_content_using_http } from "../ai_model.js";
+import {
+	parse_command,
+	create_conversation_record,
+	print_output,
+	sanitize_conversation,
+	print_message
+} from "../utils.js";
+import { generate_content } from "../ai_models/gemini_model.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 
 export async function new_conversation_guest() {
@@ -10,7 +16,7 @@ export async function new_conversation_guest() {
 
 	const initital_conversation_boilerplate = create_conversation_record();
 
-	console.log(user_prompts.chat_user_prompt);
+	print_message(user_prompts.chat_user_prompt);
 	while (true) {
 		user_response = await read_user_input(
 			process.env.USER_CONV_DISPLAY_NAME
@@ -23,17 +29,17 @@ export async function new_conversation_guest() {
 			break;
 		}
 
-		const sanitize_user_response = sanitize_conversation(user_response, "user");
+		const sanitized_user_response = sanitize_conversation(user_response, "user");
 
-		initital_conversation_boilerplate.contents.push(sanitize_user_response);
+		initital_conversation_boilerplate.contents.push(sanitized_user_response);
 
-		let [model_response, model_version] = await generate_content_using_http(
+		let [model_response, model_version] = await generate_content(
 			parsed_conversation_history.contents,
 		);
 
-		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversations");
+		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversation");
 
-		const sanitize_model_response = sanitize_conversation(model_response, "model");
-		initital_conversation_boilerplate.contents.push(sanitize_model_response);
+		const sanitized_model_response = sanitize_conversation(model_response, "model");
+		initital_conversation_boilerplate.contents.push(sanitized_model_response);
 	}
 }

@@ -1,18 +1,14 @@
 import fs from "fs";
 import { read_user_input } from "../readline.js";
-import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
-import { print_list } from "../utils.js";
+import { print_list, print_message } from "../utils.js";
+import { USER_CONVERSATIONS_DIR } from "../config/path.js";
 
 export async function list_conversation() {
-	const chat_save_dir =
-		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
 
-	const conversation_list = await fs.readdirSync(
-		`${chat_save_dir}`
-	);
+	const conversation_list = await fs.readdirSync(USER_CONVERSATIONS_DIR);
 
 	if (!conversation_list.length) {
-		console.log("no existing conversation found");
+		print_message("no existing conversation found");
 		return;
 	}
 

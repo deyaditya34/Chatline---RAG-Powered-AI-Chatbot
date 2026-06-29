@@ -1,32 +1,8 @@
-import fs from "fs";
-import { read_user_input } from "../readline.js";
-import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
+import { delete_interaction_file } from "../interaction/delete_interaction_file.js";
+import { print_message } from "../utils.js";
 
-export async function delete_interaction(interaction_id) {
-	if (!interaction_id || !Number(interaction_id)) {
-		console.log("usage: /delete <id>");
-		return;
-	}
+export async function delete_interaction(conv_name) {
+	await delete_interaction_file(conv_name);
 
-	const chat_save_dir =
-		`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
-
-	const interaction_list = await fs.readdirSync(
-		`${chat_save_dir}`
-	);
-
-	if (Number(interaction_id) > interaction_list.length) {
-		console.log("invalid user input");
-		return;
-	}
-
-	const fileName = `${interaction_list[Number(interaction_id) - 1]}`;
-	const filePath = `${chat_save_dir}/${fileName}`;
-
-	try {
-		await fs.unlinkSync(filePath);
-		console.log(`interaction - '${fileName}' deleted`);
-	} catch (err) {
-		console.log("err in deleting file -", err);
-	}
+	print_message(`interaction - '${conv_name}' deleted`);
 }

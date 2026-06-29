@@ -1,55 +1,11 @@
-import fs from "fs";
-import { read_user_input } from "../readline.js";
-import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
-import { delete_document } from "../databases/qdrant.js";
-import * as elastic_search from "../databases/elastic_search.js";
+import { delete_conversation_db } from "../conversation/delete_conversation_db.js";
+import { delete_conversation_file } from "../conversation/delete_conversation_file.js";
+import { print_message } from "../utils.js";
 
-export async function delete_conversation(conv_id) {
-	if (!conv_id || !Number(conv_id)) {
-		console.log("usage: /delete <id>");
-		return;
-	}
+export async function delete_conversation(conv_name) {
+	await delete_conversation_db(conv_name);
+	await delete_conversation_file(conv_name);
 
-	const chat_save_dir_user =
-		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
+	print_message(`conversation - '${conv_name}' deleted`);
 
-	const conversation_list = await fs.readdirSync(
-		`${chat_save_dir_user}`
-	);
-
-	const chat_save_dir_model =
-		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_TOKEN_BASED_SLIDING_DIR}`;
-
-	if (Number(conv_id) > conversation_list.length) {
-		console.log("invalid user input");
-		return;
-	}
-
-	const fileName = `${conversation_list[Number(conv_id) - 1]}`;
-	const filePath_user = `${chat_save_dir_user}/${fileName}`;
-	const filePath_model = `${chat_save_dir_model}/${fileName}`;
-
-	const file_content = fs.readFileSync(filePath_user);
-
-	const semantic_delete_criteria = {
-		must: [
-			{
-				key: "conversation_id",
-				match: {
-					value: fileName
-				}
-			}
-		]
-	}
-	await delete_document(semantic_delete_criteria);
-
-	await elastic_search.delete_conversation(fileName);
-
-	try {
-		await fs.unlinkSync(filePath_user);
-		await fs.unlinkSync(filePath_model);
-		console.log(`conversation - '${fileName}' deleted`);
-	} catch (err) {
-		console.log("err in deleting file -", err);
-	}
 }

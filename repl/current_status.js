@@ -1,5 +1,5 @@
-import {ai_model, system_instruction_message} from "../ai_model.js";
-import {mode} from "../session.js";
+import { ai_model, system_instruction_message } from "../config/ai.js";
+import { mode, current_conversation_id } from "../session.js";
 
 export function print_current_status() {
 	process.stdout.write("\x1B[38;2;255;180;180m");
@@ -7,8 +7,13 @@ export function print_current_status() {
 	process.stdout.write("\x1B[0m");
 
 	process.stdout.write("\x1B[38;2;160;160;220m");
+	if (current_conversation_id) {
+		console.log(`\tCurrent Conversation\t\t${current_conversation_id}`);
+	} else {
+		console.log(`\tCurrent Conversation\t\tNot Selected`);
+	}
 	console.log(`\tModel\t\t\t\t${ai_model}`);
 	console.log(`\tMode\t\t\t\t${mode}`);
 	console.log(`\tSystem Instruction\t\t${system_instruction_message}`);
-	process.stdout.write("\x1B[0m");	
+	process.stdout.write("\x1B[0m");
 }

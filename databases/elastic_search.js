@@ -1,13 +1,14 @@
 import { Client } from "@elastic/elasticsearch";
+import { ELASTIC_SEARCH_INDEX } from "../config/database.js";
 
 const client = new Client({
 	node: "http://127.0.0.1:9200"
 });
 
-export async function create_index(index_name) {
+export async function create_index() {
 	try {
 		const exists = await client.indices.exists(
-			{ index: index_name }
+			{ index: ELASTIC_SEARCH_INDEX }
 		)
 
 		if (!exists) {
@@ -15,10 +16,10 @@ export async function create_index(index_name) {
 				{ index: index_name }
 			);
 
-			console.log(`Index '${index_name}' created`);
-			console.log(`Index '${index_name}' initialized`);
+			console.log(`Index '${ELASTIC_SEARCH_INDEX}' created`);
+			console.log(`Index '${ELASTIC_SEARCH_INDEX}' initialized`);
 		} else {
-			console.log(`Index '${index_name}' initialized`);
+			console.log(`Index '${ELASTIC_SEARCH_INDEX}' initialized`);
 		}
 	} catch (err) {
 		console.error(err);
@@ -27,7 +28,7 @@ export async function create_index(index_name) {
 
 export async function insert_document(document) {
 	const response = await client.index({
-		index: process.env.ELASTIC_DB_COLLECTION_NAME,
+		index: ELASTIC_SEARCH_INDEX,
 		document
 	});
 
@@ -36,7 +37,7 @@ export async function insert_document(document) {
 
 export async function search_document(user_query, size = 5) {
 	const response = await client.search({
-		index: process.env.ELASTIC_DB_COLLECTION_NAME,
+		index: ELASTIC_SEARCH_INDEX,
 		size,
 		query: {
 			match: {
@@ -48,89 +49,54 @@ export async function search_document(user_query, size = 5) {
 	return response.hits.hits;
 }
 
+export async function search_documents(
+	user_query,
+	conversation_id,
+	source,
+	size = 5
+) {
+	const response = await client.search({
+		index: ELASTIC_SEARCH_INDEX,
+		size,
+		query: {
+			bool: {
+				must: [
+					{
+						match: {
+							text: user_query
+						}
+					}
+				],
+				filter: [
+					{
+						term: {
+							"conversation_id.keyword": conversation_id
+						}
+					},
+					{
+						term: {
+							"source_type.keyword": source
+						}
+					}
+				]
+			}
+		}
+	});
+
+	return response.hits.hits;
+}
+
 export async function get_indices() {
 	const response = await client.indices.getMapping({
-		index: process.env.ELASTIC_DB_COLLECTION_NAME
+		index: ELASTIC_SEARCH_INDEX
 	});
 
 	return response;
 }
 
-export async function search_in_uploaded_docs(
-	user_query,
-	conversation_id,
-	size = 5
-) {
-	const response = await client.search({
-		index: process.env.ELASTIC_DB_COLLECTION_NAME,
-		size,
-		query: {
-			bool: {
-				must: [
-					{
-						match: {
-							text: user_query
-						}
-					}
-				],
-				filter: [
-					{
-						term: {
-							"conversation_id.keyword": conversation_id
-						}
-					},
-					{
-						term: {
-							"source_type.keyword": "document"
-						}
-					}
-				]
-			}
-		}
-	});
-
-	return response.hits.hits;
-}
-
-export async function search_in_past_conversation(
-	user_query,
-	conversation_id,
-	size = 5
-) {
-	const response = await client.search({
-		index: process.env.ELASTIC_DB_COLLECTION_NAME,
-		size,
-		query: {
-			bool: {
-				must: [
-					{
-						match: {
-							text: user_query
-						}
-					}
-				],
-				filter: [
-					{
-						term: {
-							"conversation_id.keyword": conversation_id
-						}
-					},
-					{
-						term: {
-							"source_type.keyword": "conversation"
-						}
-					}
-				]
-			}
-		}
-	});
-
-	return response.hits.hits;
-}
-
 export async function delete_conversation(conversation_id) {
 	const response = await client.deleteByQuery({
-		index: process.env.ELASTIC_DB_COLLECTION_NAME,
+		index: ELASTIC_SEARCH_INDEX,
 		query: {
 			bool: {
 				filter: [
@@ -149,7 +115,7 @@ export async function delete_conversation(conversation_id) {
 
 export async function delete_document(document_id) {
 	const response = await client.delete({
-		index: process.env.ELASTIC_DB_COLLECTION_NAME,
+		index: ELASTIC_SEARCH_INDEX,
 		id: document_id
 	})
 
@@ -158,7 +124,7 @@ export async function delete_document(document_id) {
 
 export async function delete_index() {
 	const response = await client.indices.delete({
-		index: process.env.ELASTIC_DB_COLLECTION_NAME
+		index: ELASTIC_SEARCH_INDEX
 	});
 
 	return response;

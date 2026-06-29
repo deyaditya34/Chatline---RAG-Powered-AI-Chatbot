@@ -1,27 +1,15 @@
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import readline from "readline";
-import { embed_content } from "../ai_model.js";
 import { print_output, sanitize_conversation } from "../utils.js";
-import { insert_document } from "../databases/qdrant.js";
-import * as elastic_search from "../databases/elastic_search.js";
+import { load_conversation_user } from "../conversation/load_conversation_user.js";
+import { create_embedding } from "../embedding/create_embedding.js";
+import { store_uploaded_doc } from "../conversation/store_uploaded_doc.js";
+import { store_conversation_user_file } from "../conversation/store_conversation_user_file.js";
 
-export async function embed_document(doc_path, conv_id) {
-	const chat_topic = conv_id;
-	let conversation_history_user;
-	let conversation_history_model;
+export async function embed_document(doc_path, conv_name) {
 
-	const chat_save_dir_for_user =
-		`${process.env.CONV_STORAGE_DIR}/${process.env.STATELESS_CONV_STORAGE_DIR}`;
-
-	try {
-		conversation_history_user = fs.readFileSync(`${chat_save_dir_for_user}/${chat_topic}`);
-	} catch (err) {
-		console.error("error in retrieving conversation", err);
-		return;
-	}
-
-	let parsed_conversation_history_user = JSON.parse(conversation_history_user.toString());
+	let parsed_conversation_history_user = await load_conversation_user(conv_name);
 
 	let document_details = {
 		file_name: doc_path,
@@ -45,38 +33,16 @@ export async function embed_document(doc_path, conv_id) {
 		if (line.trim() === "") {
 			if (paragraph.trim()) {
 
-				const result = await embed_content(sanitize_conversation(paragraph, "user"));
-				const embedding = result.embedding.values;
+				const sanitized_document_chunk = sanitize_conversation(paragraph, "user");
+				const embedding = await create_embedding(sanitized_document_chunk);
 
-				let chunk_details = {
-					conversation_id: chat_topic,
-					source_type: "document",
-					document_id: document_details.document_id,
-					uploaded_at: document_details.uploaded_at,
-					text: paragraph,
-					embedding: embedding
-				}
-
-				const document_insert = await insert_document(
-					{
-						embedding: chunk_details.embedding,
-						payload: {
-							text: chunk_details.text,
-							conversation_id: chunk_details.conversation_id,
-							document_id: chunk_details.document_id,
-							source_type: chunk_details.source_type,
-							uploaded_at: chunk_details.uploaded_at
-						}
-					}
-				)
-
-				const elastic_db_insert = await elastic_search.insert_document({
-					text: chunk_details.text,
-					conversation_id: chat_topic,
-					source_type: "document",
-					document_id: chunk_details.document_id,
-					uploaded_at: chunk_details.uploaded_at,
-				})
+				await store_uploaded_doc(
+					conv_name,
+					document_details.document_id,
+					document_details.uploaded_at,
+					paragraph,
+					embedding
+				);
 
 				paragraph = "";
 			}
@@ -86,38 +52,16 @@ export async function embed_document(doc_path, conv_id) {
 	}
 
 	if (paragraph.trim()) {
-		const result = await embed_content(sanitize_conversation(paragraph, "user"));
-		const embedding = result.embedding.values;
+		const sanitized_document_chunk = sanitize_conversation(paragraph, "user");
+		const embedding = await create_embedding(sanitized_document_chunk);
 
-		let chunk_details = {
-			conversation_id: chat_topic,
-			document_id: document_details.document_id,
-			uploaded_at: document_details.uploaded_at,
-			text: paragraph,
-			embedding: embedding,
-			source_type: "document"
-		}
-
-		const document_insert = await insert_document(
-			{
-				embedding: chunk_details.embedding,
-				payload: {
-					text: chunk_details.text,
-					conversation_id: chunk_details.conversation_id,
-					document_id: chunk_details.document_id,
-					source_type: chunk_details.source_type,
-					uploaded_at: chunk_details.uploaded_at
-				}
-			}
-		)
-
-		const elastic_db_insert = await elastic_search.insert_document({
-			text: chunk_details.text,
-			conversation_id: chat_topic,
-			source_type: "document",
-			document_id: chunk_details.document_id,
-			uploaded_at: chunk_details.uploaded_at,
-		})
+		await store_uploaded_doc(
+			conv_name,
+			document_details.document_id,
+			document_details.uploaded_at,
+			paragraph,
+			embedding
+		);
 	}
 
 	print_output(
@@ -126,8 +70,9 @@ export async function embed_document(doc_path, conv_id) {
 		"embedding"
 	)
 
-	fs.writeFileSync(`${chat_save_dir_for_user}/${chat_topic}`,
-		JSON.stringify(parsed_conversation_history_user)
+	await store_conversation_user_file(
+		conv_name,
+		parsed_conversation_history_user
 	);
 }
 

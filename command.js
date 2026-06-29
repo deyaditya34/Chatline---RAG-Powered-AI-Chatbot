@@ -1,12 +1,11 @@
 import { print_help_command } from "./repl/help.js";
 import { change_ai_model } from "./repl/model_set.js";
 import { get_model_info } from "./repl/model_info.js";
-import { one_time_chat } from "./repl/one_time_chat.js";
 import { new_conversation_guest } from "./repl/new_conversation_guest.js";
-import { switch_conversation } from "./repl/switch_conversation.js";
 import { conversation_history } from "./repl/conversation_history.js";
 import { list_conversation } from "./repl/list_conversations.js";
 import { delete_conversation } from "./repl/delete_conversation.js";
+import { new_interaction } from "./repl/new_interaction.js";
 import { new_interaction_guest } from "./repl/new_interaction_guest.js";
 import { interaction_history } from "./repl/interaction_history.js";
 import { switch_interaction } from "./repl/switch_interaction.js";
@@ -14,25 +13,22 @@ import { list_interaction } from "./repl/list_interactions.js";
 import { delete_interaction } from "./repl/delete_interaction.js";
 import { print_output, print_message } from "./utils.js";
 import { print_current_status } from "./repl/current_status.js";
-import { new_sliding_window_conversation } from "./repl/new_conversation_fixed_sliding_window.js";
-import { switch_sliding_window_conversation } from "./repl/switch_conversation_fixed_sliding_window.js";
-import { new_sliding_window_token_based_conversation } from "./repl/new_conversation_token_based_sliding_window.js";
-import { switch_sliding_window_token_based_conversation } from "./repl/switch_conversation_token_based_sliding_window.js";
+import { new_conversation } from "./repl/new_conversation.js";
+import { switch_conversation } from "./repl/switch_conversation.js";
 import {
 	mode, set_conversation_mode, current_conversation_id,
-	set_current_conversation_id_for_new_conv,
-	set_current_conversation_id_for_switch_conv,
-	set_current_convsersation_id_for_new_interaction,
-	set_current_conversation_id_for_switch_interaction
+	set_current_conversation_id_from_conv_name,
+	set_current_conversation_id_from_conv_id,
+	set_current_convsersation_id_from_interaction_name,
+	set_current_conversation_id_from_interaction_id
 }
 	from "./session.js";
 import { embed_document } from "./repl/embed_document.js";
-import { 
-	ai, 
-	ai_model_list, 
-	set_system_instruction_message, 
-	set_conversation_token_limit,
-} from "./ai_model.js";
+import {
+	ai,
+	ai_model_list,
+} from "./ai_models/gemini_model.js";
+import { set_system_instruction_message, set_conversation_token_limit } from "./config/ai.js";
 import { delete_coll } from "./repl/delete_collection.js";
 import * as elastic_search from "./databases/elastic_search.js";
 
@@ -89,12 +85,6 @@ export async function handle_command(command, args) {
 			print_current_status();
 			break;
 
-		case "chat":
-			message = args.join(" ");
-			const response = await one_time_chat(message);
-			print_output(response, process.env.MODEL_DISPLAY_NAME, "conversations");
-			break;
-
 		case "guest_chat":
 			if (mode === "rest") {
 				await new_conversation_guest();
@@ -106,10 +96,10 @@ export async function handle_command(command, args) {
 		case "new":
 			conv_name = args.join(" ");
 			if (mode === "rest") {
-				set_current_conversation_id_for_new_conv(conv_name);
-				await new_sliding_window_token_based_conversation(current_conversation_id);
+				set_current_conversation_id_from_conv_name(conv_name);
+				await new_conversation(current_conversation_id);
 			} else {
-				set_current_convsersation_id_for_new_interaction(conv_name);
+				set_current_convsersation_id_from_interaction_name(conv_name);
 				await new_interaction(conv_name);
 			}
 			break;
@@ -117,10 +107,10 @@ export async function handle_command(command, args) {
 		case "switch":
 			conv_id = args[0];
 			if (mode === "rest") {
-				await set_current_conversation_id_for_switch_conv(conv_id);
-				await switch_sliding_window_token_based_conversation(current_conversation_id);
+				await set_current_conversation_id_from_conv_id(conv_id);
+				await switch_conversation(current_conversation_id);
 			} else {
-				await set_current_conversation_id_for_switch_interaction(conv_id);
+				await set_current_conversation_id_from_interaction_id(conv_id);
 				await switch_interaction(current_conversation_id);
 			}
 			break;
@@ -128,15 +118,17 @@ export async function handle_command(command, args) {
 		case "history":
 			conv_id = args[0]
 			if (mode === "rest") {
-				await conversation_history(conv_id);
+				await set_current_conversation_id_from_conv_id(conv_id);
+				await conversation_history(current_conversation_id);
 			} else {
-				await interaction_history(conv_id);
+				await set_current_conversation_id_from_interaction_id(conv_id);
+				await interaction_history(current_conversation_id);
 			}
 			break;
 
 		case "conversation_mode":
 			const user_input = args[0];
-			if (args[0] === "rest" || args[0] === "interactions") {
+			if (args[0] === "rest" || args[0] === "interaction") {
 				set_conversation_mode(args[0]);
 			} else {
 				console.log("invalid_user_input");
@@ -154,9 +146,11 @@ export async function handle_command(command, args) {
 		case "delete":
 			conv_id = args[0];
 			if (mode === "rest") {
-				await delete_conversation(conv_id);
+				await set_current_conversation_id_from_conv_id(conv_id);
+				await delete_conversation(current_conversation_id);
 			} else {
-				await delete_interaction(conv_id);
+				await set_current_conversation_id_from_interaction_id(conv_id);
+				await delete_interaction(current_conversation_id);
 			}
 			break;
 

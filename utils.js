@@ -30,8 +30,7 @@ export function print_list(list) {
 export function create_conversation_record() {
 	const result = {};
 	result.contents = [];
-	result.chat_turns = 0;
-	result.chat_starting_index = 0;
+	result.model_version = "";
 	result.token_limit_exceeded_once = false;
 	result.uploadedDocuments = [];
 
@@ -41,6 +40,7 @@ export function create_conversation_record() {
 export function create_interaction_record() {
 	const result = {};
 	result.outputs = [];
+	result.model_version = "";
 	return result;
 }
 
@@ -50,7 +50,7 @@ export function print_message(message) {
 }
 
 export function print_output(message, entity, job) {
-	if (job === "conversations" || job === "interactions") {
+	if (job === "conversation" || job === "interaction") {
 		const [first_line, ...rest] = message.split("\n");
 
 		if (entity === process.env.MODEL_DISPLAY_NAME) {
@@ -109,10 +109,10 @@ export function sanitize_and_print_conversation(conversation) {
 
 	for (const el of result) {
 		if (el.user) {
-			print_output(el.user, process.env.USER_DISPLAY_NAME, "conversations");
+			print_output(el.user, process.env.USER_DISPLAY_NAME, "conversation");
 		}
 		else if (el.model) {
-			print_output(el.model, process.env.MODEL_DISPLAY_NAME, "conversations");
+			print_output(el.model, process.env.MODEL_DISPLAY_NAME, "conversation");
 		}
 	}
 }
@@ -124,10 +124,10 @@ export function sanitize_and_print_interaction(interaction) {
 
 	for (const el of result) {
 		if (el.user) {
-			print_output(el.user, process.env.USER_DISPLAY_NAME, "interactions");
+			print_output(el.user, process.env.USER_DISPLAY_NAME, "interaction");
 		}
 		else if (el.model) {
-			print_output(el.model, process.env.MODEL_DISPLAY_NAME, "interactions");
+			print_output(el.model, process.env.MODEL_DISPLAY_NAME, "interaction");
 		}
 	}
 }
@@ -145,15 +145,5 @@ export function parse_command(input) {
 
 	command = command.slice(1, command.length);
 	return [command, args];
-}
-
-export function tail_conversation(contents, content_starting_index) {
-	const result = [];
-
-	for (let i = content_starting_index; i < contents.length; i++) {
-		result.push(contents[i]);
-	}
-
-	return result;
 }
 

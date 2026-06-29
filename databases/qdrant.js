@@ -1,18 +1,18 @@
-import fs from "fs";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { v4 as uuidv4 } from "uuid";
+import { QDRANT_COLLECTION } from "../config/database.js";
 
 const qdrant = new QdrantClient({
 	url: "http://localhost:6333"
 });
 
-export async function create_collection(collection_name) {
+export async function create_collection() {
 	const collections = await qdrant.getCollections();
 
 	if (collections.collections.length > 0) {
 		console.log("initialized qdrant database")
 	} else {
-		await qdrant.createCollection(collection_name, {
+		await qdrant.createCollection(QDRANT_COLLECTION, {
 			vectors: {
 				size: 3072,
 				distance: "Cosine"
@@ -24,17 +24,17 @@ export async function create_collection(collection_name) {
 	}
 }
 
-export async function insert_document(document) {
-	const result = await qdrant.upsert(process.env.DATABASE_COLLECTION_NAME,
+export async function insert_documents(documents) {
+	const points = documents.map((doc) => ({
+		id: uuidv4(),
+		vector: doc.embedding,
+		payload: doc.payload
+	}));
+
+	const result = await qdrant.upsert(QDRANT_COLLECTION,
 		{
 			wait: true,
-			points: [
-				{
-					id: uuidv4(),
-					vector: document.embedding,
-					payload: document.payload
-				}
-			]
+			points: points
 		}
 	)
 
@@ -42,7 +42,7 @@ export async function insert_document(document) {
 }
 
 export async function search_collection(embedding) {
-	const result = await qdrant.search(process.env.DATABASE_COLLECTION_NAME,
+	const result = await qdrant.search(QDRANT_COLLECTION,
 		{
 			vector: embedding,
 			filter: {}
@@ -53,7 +53,7 @@ export async function search_collection(embedding) {
 };
 
 export async function search_documents(embedding, conversation_id, source_type) {
-	const result = await qdrant.search(process.env.DATABASE_COLLECTION_NAME,
+	const result = await qdrant.search(QDRANT_COLLECTION,
 		{
 			vector: embedding,
 			filter: {
@@ -79,14 +79,14 @@ export async function search_documents(embedding, conversation_id, source_type) 
 }
 
 export async function scroll_document() {
-	const result = await qdrant.scroll(process.env.DATABASE_COLLECTION_NAME, {
+	const result = await qdrant.scroll(QDRANT_COLLECTION, {
 		limit: 100
 	});
 	console.log(JSON.stringify(result, null, 2));
 }
 
 export async function delete_document(criteria = {}) {
-	const result = await qdrant.delete(process.env.DATABASE_COLLECTION_NAME, {
+	const result = await qdrant.delete(QDRANT_COLLECTION, {
 		filter: criteria
 	});
 
@@ -94,7 +94,7 @@ export async function delete_document(criteria = {}) {
 }
 
 export async function delete_collection() {
-	const result = await qdrant.deleteCollection(process.env.DATABASE_COLLECTION_NAME);
+	const result = await qdrant.deleteCollection(QDRANT_COLLECTION);
 
 	return result;
 }

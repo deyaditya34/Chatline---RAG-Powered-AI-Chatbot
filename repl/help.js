@@ -55,7 +55,7 @@ export async function print_help_command() {
 	console.log("\t/system_instruction <message>\tUpdates the chatbot's system prompt");
 	console.log("\t/token_limit <token_limit>\tThe Maximum conversation context size in tokens");
 	console.log("\t/status\t\t\t\tCurrent status");
-	console.log("\t/conversation_mode <type>\trest | interactions");
+	console.log("\t/conversation_mode <type>\trest | interaction");
 	console.log("\t/clear\t\t\t\tClear screen");
 	console.log("\t/help\t\t\t\tShow help");
 	console.log("\t/exit\t\t\t\tQuit");

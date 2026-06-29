@@ -8,7 +8,7 @@ export function set_conversation_mode(conv_mode) {
 	mode = conv_mode;
 }
 
-export function set_current_conversation_id_for_new_conv(conv_name) {
+export function set_current_conversation_id_from_conv_name(conv_name) {
 	let base_name = conv_name;
 	let chat_topic = base_name;
 
@@ -29,7 +29,7 @@ export function set_current_conversation_id_for_new_conv(conv_name) {
 	current_conversation_id = chat_topic;
 }
 
-export async function set_current_conversation_id_for_switch_conv(conv_id) {
+export async function set_current_conversation_id_from_conv_id(conv_id) {
 	if (!conv_id) {
 		console.log("usage: /switch <id>");
 		return;
@@ -52,11 +52,11 @@ export async function set_current_conversation_id_for_switch_conv(conv_id) {
 	current_conversation_id = conversation_list[fileNo];
 }
 
-export function set_current_convsersation_id_for_new_interaction(conv_name) {
-	let base_name = conv_name;
+export function set_current_convsersation_id_from_interaction_name(interaction_name) {
+	let base_name = interaction_name;
 	let chat_topic = base_name;
 
-	if (!conv_name) {
+	if (!interaction_name) {
 		chat_topic = `chat ${new Date().getTime()}`;
 	} else {
 		const chat_save_dir =
@@ -73,7 +73,7 @@ export function set_current_convsersation_id_for_new_interaction(conv_name) {
 	current_conversation_id = chat_topic;
 }
 
-export async function set_current_conversation_id_for_switch_interaction(interaction_id) {
+export async function set_current_conversation_id_from_interaction_id(interaction_id) {
 	if (!interaction_id) {
 		console.log("usage: /switch <id>");
 		return;

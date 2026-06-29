@@ -7,24 +7,16 @@ import {
 	sanitize_interaction, sanitize_and_print_interaction,
 	print_output, parse_prev_model_response_id
 } from "../utils.js";
-import { create_new_interaction, generate_content_using_http } from "../ai_model.js";
+import { create_new_interaction } from "../ai_models/gemini_model.js";
+import { load_interaction } from "../interaction/load_interaction.js";
+import { store_interaction } from "../interaction/store_interaction.js";
 
 export async function switch_interaction(conv_name) {
 	let user_response;
-	let model_response;
-	let prev_model_version;
-	let prev_model_response_id;
 
-	const fileName = conv_name;
+	let parsed_interaction_history = await load_interaction(conv_name);
+	let prev_model_response_id = parse_prev_model_response_id(parsed_interaction_history);
 
-	const chat_save_dir =
-		`${process.env.CONV_STORAGE_DIR}/${process.env.INTERACTION_CONV_STORAGE_DIR}`;
-
-	const interaction_history = fs.readFileSync(
-		`${chat_save_dir}/${fileName}`
-	);
-	const parsed_interaction_history = JSON.parse(interaction_history.toString());
-	prev_model_response_id = parse_prev_model_response_id(parsed_interaction_history);
 	sanitize_and_print_interaction(parsed_interaction_history);
 
 	while (true) {
@@ -39,25 +31,20 @@ export async function switch_interaction(conv_name) {
 			break;
 		};
 
-		const sanitize_user_response = sanitize_interaction(user_response, "user");
-		parsed_interaction_history.outputs.push(sanitize_user_response);
+		const sanitized_user_response = sanitize_interaction(user_response, "user");
+		parsed_interaction_history.outputs.push(sanitized_user_response);
 
-		prev_model_version = parsed_interaction_history.model_version;
+		let prev_model_version = parsed_interaction_history.model_version;
 		let [model_response, model_version, model_response_id] =
 			await create_new_interaction(user_response, prev_model_response_id);
 
 		prev_model_response_id = model_response_id;
-		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "conversations");
+		print_output(model_response, process.env.MODEL_DISPLAY_NAME, "interaction");
 
-		if (model_response) {
-			const sanitize_model_response = sanitize_interaction(model_response, "model");
-			parsed_interaction_history.outputs.push(sanitize_model_response);
-			parsed_interaction_history.model_version = model_version;
+		const sanitize_model_response = sanitize_interaction(model_response, "model");
+		parsed_interaction_history.outputs.push(sanitize_model_response);
+		parsed_interaction_history.model_version = model_version;
 
-			fs.writeFileSync(
-				`${chat_save_dir}/${fileName}`,
-				JSON.stringify(parsed_interaction_history)
-			);
-		};
-	}
+		await store_interaction(conv_name, parsed_interaction_history);
+	};
 }

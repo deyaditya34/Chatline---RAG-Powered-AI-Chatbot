@@ -1,4 +1,5 @@
-import { ai, ai_model, set_ai_model, ai_model_list } from "../ai_model.js";
+import { ai, ai_model_list } from "../ai_models/gemini_model.js";
+import { set_ai_model, ai_model } from "../config/ai.js";
 
 export async function change_ai_model(model_name) {
 	const model_list = await ai_model_list(ai);
