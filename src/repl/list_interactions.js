@@ -1,6 +1,6 @@
 import fs from "fs";
 import { read_user_input } from "../readline.js";
-import { print_list } from "../utils.js";
+import { print_list } from "../cli/output.js";
 import { INTERACTIONS_DIR } from "../config/path.js";
 
 export async function list_interaction() {

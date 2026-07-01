@@ -11,7 +11,7 @@ import { interaction_history } from "./repl/interaction_history.js";
 import { switch_interaction } from "./repl/switch_interaction.js";
 import { list_interaction } from "./repl/list_interactions.js";
 import { delete_interaction } from "./repl/delete_interaction.js";
-import { print_output, print_message } from "./utils.js";
+import { print_output, print_message } from "./cli/output.js";
 import { print_current_status } from "./repl/current_status.js";
 import { new_conversation } from "./repl/new_conversation.js";
 import { switch_conversation } from "./repl/switch_conversation.js";

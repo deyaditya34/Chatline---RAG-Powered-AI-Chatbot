@@ -1,4 +1,4 @@
-import { sanitize_and_print_interaction } from "../utils.js";
+import { sanitize_and_print_interaction } from "../interaction/utils.js";
 import { load_interaction } from "../interaction/load_interaction.js";
 
 export async function interaction_history(conv_name) {

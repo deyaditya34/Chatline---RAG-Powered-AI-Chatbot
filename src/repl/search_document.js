@@ -1,5 +1,5 @@
 import { embed_content } from "../ai_model.js";
-import { sanitize_conversation } from "../utils.js";
+import { sanitize_conversation } from "../conversation/utils.js";
 import { search_collection } from "../databases/qdrant.js";
 import { current_conversation_id } from "../session.js";
 

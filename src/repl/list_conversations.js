@@ -1,6 +1,6 @@
 import fs from "fs";
 import { read_user_input } from "../readline.js";
-import { print_list, print_message } from "../utils.js";
+import { print_list, print_message } from "../cli/output.js";
 import { USER_CONVERSATIONS_DIR } from "../config/path.js";
 
 export async function list_conversation() {

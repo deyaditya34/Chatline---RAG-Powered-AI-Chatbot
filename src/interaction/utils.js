@@ -1,3 +1,4 @@
+import { print_output } from "../cli/output.js";
 
 export function sanitize_interaction(data, entity) {
 	let result = {};

@@ -1,9 +1,8 @@
 import { handle_command } from "../command.js";
 import { read_user_input } from "../readline.js";
-import {
-	parse_command,
-	sanitize_conversation, sanitize_and_print_conversation, print_output
-} from "../utils.js";
+import { print_output } from "../cli/output.js";
+import { parse_command } from "./utils.js";
+import { sanitize_conversation, sanitize_and_print_conversation } from "../conversation/utils.js";
 import { generate_content } from "../ai_models/gemini_model.js";
 import { load_conversation } from "../conversation/load_conversation.js";
 import { create_embedding } from "../embedding/create_embedding.js";

@@ -1,4 +1,4 @@
-import { sanitize_conversation } from "../utils.js";
+import { sanitize_conversation } from "./utils.js";
 import { retrieve_conversation_context } from "../retrieval/retrieve_conversation_context.js"
 import { count_tokens } from "../ai_models/gemini_model.js";
 

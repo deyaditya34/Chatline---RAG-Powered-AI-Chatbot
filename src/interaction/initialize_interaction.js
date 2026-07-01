@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { create_interaction_record } from "../utils.js";
+import { create_interaction_record } from "./utils.js";
 import { INTERACTIONS_DIR } from "../config/path.js";
 
 export async function initialize_interaction(conv_name) {

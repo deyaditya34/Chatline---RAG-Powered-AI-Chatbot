@@ -1,13 +1,9 @@
 import fs from "fs";
 import { handle_command } from "../command.js";
 import { read_user_input } from "../readline.js";
-import { 
-	parse_command, 
-	print_message, 
-	create_interaction_record, 
-	sanitize_interaction, 
-	print_output 
-} from "../utils.js";
+import { create_interaction_record, sanitize_interaction } from "../interaction/utils.js";
+import { parse_command } from "./utils.js";
+import { print_output, print_message } from "../cli/output.js";
 import { create_new_interaction } from "../ai_models/gemini_model.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 

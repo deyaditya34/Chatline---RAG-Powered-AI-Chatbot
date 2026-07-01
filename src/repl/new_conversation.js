@@ -1,6 +1,8 @@
 import { handle_command } from "../command.js";
 import { read_user_input } from "../readline.js";
-import { parse_command, print_output, sanitize_conversation, print_message } from "../utils.js";
+import { sanitize_conversation } from "../conversation/utils.js";
+import { parse_command } from "./utils.js";
+import { print_list, print_message } from "../cli/output.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import ai_prompts from "../prompts/default_ai_prompts.json" with {type: "json"};
 import { generate_content } from "../ai_models/gemini_model.js";

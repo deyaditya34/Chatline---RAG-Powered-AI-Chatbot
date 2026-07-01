@@ -1,12 +1,14 @@
 import fs from "fs";
-import { parse_command } from "../utils.js";
+import { parse_command } from "./utils.js";
 import { handle_command } from "../command.js";
 import { read_user_input } from "../readline.js";
 import user_prompts from "../prompts/default_user_prompts.json" with {type: "json"};
 import {
-	sanitize_interaction, sanitize_and_print_interaction,
-	print_output, parse_prev_model_response_id
-} from "../utils.js";
+	sanitize_interaction,
+	sanitize_and_print_interaction,
+	parse_prev_model_response_id
+} from "../interaction/utils.js";
+import { print_output } from "../cli/output.js";
 import { create_new_interaction } from "../ai_models/gemini_model.js";
 import { load_interaction } from "../interaction/load_interaction.js";
 import { store_interaction } from "../interaction/store_interaction.js";

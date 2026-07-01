@@ -1,7 +1,8 @@
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import readline from "readline";
-import { print_output, sanitize_conversation } from "../utils.js";
+import { print_output } from "../cli/output.js";
+import { sanitize_conversation } from "../conversation/utils.js";
 import { load_conversation_user } from "../conversation/load_conversation_user.js";
 import { create_embedding } from "../embedding/create_embedding.js";
 import { store_uploaded_doc } from "../conversation/store_uploaded_doc.js";

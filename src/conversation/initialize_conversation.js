@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { USER_CONVERSATIONS_DIR, MODEL_CONVERSATIONS_DIR } from "../config/path.js";
-import { create_conversation_record } from "../utils.js";
+import { create_conversation_record } from "./utils.js";
 
 export async function initialize_conversation(conv_name) {
 

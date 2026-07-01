@@ -1,3 +1,5 @@
+import { print_output } from "../cli/output.js"
+
 export function sanitize_conversation(data, entity) {
 	let result = {};
 

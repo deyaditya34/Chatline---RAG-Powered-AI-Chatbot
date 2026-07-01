@@ -1,4 +1,4 @@
-import { sanitize_and_print_conversation } from "../utils.js";
+import { sanitize_and_print_conversation } from "../conversation/utils.js";
 import { load_conversation_user } from "../conversation/load_conversation_user.js";
 
 export async function conversation_history(conv_name) {

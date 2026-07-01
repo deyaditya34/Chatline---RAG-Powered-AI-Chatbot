@@ -18,7 +18,6 @@ export async function load_conversation(conv_name) {
 		conversation_history_model.toString()
 	);
 
-
 	return {
 		parsed_conversation_history_user,
 		parsed_conversation_history_model
