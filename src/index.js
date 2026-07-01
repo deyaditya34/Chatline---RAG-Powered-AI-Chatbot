@@ -2,9 +2,8 @@ import fs from "fs";
 import { handle_command } from "./command.js";
 import { parse_command } from "./utils.js";
 import { read_user_input } from "./readline.js";
-import user_prompts from "./prompts/default_user_prompts.json" with {type: "json"};
-import * as vector_store from "./databases/qdrant.js";
-import * as keyword_store from "./databases/elastic_search.js";
+//import * as vector_store from "./databases/qdrant.js";
+//import * as keyword_store from "./databases/elastic_search.js";
 import {
 	DATA_DIR,
 	CONVERSATIONS_DIR,
@@ -12,7 +11,6 @@ import {
 	USER_CONVERSATIONS_DIR,
 	MODEL_CONVERSATIONS_DIR
 } from "./config/path.js";
-
 
 async function main() {
 	console.log(`\x1B[38;2;255;180;180mGemini CLI\n\x1B[0m`)
@@ -49,8 +47,8 @@ async function main() {
 		fs.mkdirSync(INTERACTIONS_DIR);
 	}
 
-	await vector_store.create_collection();
-	await keyword_store.create_index();
+//	await vector_store.create_collection();
+//	await keyword_store.create_index();
 
 	while (running) {
 		let input = await read_user_input(process.env.USER_DISPLAY_NAME);
