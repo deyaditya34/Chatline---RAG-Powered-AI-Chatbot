@@ -128,30 +128,6 @@ When the app starts, use `/help` to show available commands.
 - `/embed <doc_path>` — embed a document into the current conversation context
 - `/delete_coll` — remove the configured Elasticsearch index and cleanup stored collection data
 
-## Configuration
-
-Important `.env` variables (from `.env.example`):
-
-- `GEMINI_API_KEY`
-- `DATA_DIR`
-- `CONVERSATIONS_DIR`
-- `USER_CONVERSATIONS_DIR`
-- `MODEL_CONVERSATIONS_DIR`
-- `INTERACTIONS_DIR`
-- `CONVERSATION_TOKEN_LIMIT`
-- `DEFAULT_MODEL`
-- `DEFAULT_MODE`
-- `DEFAULT_SYSTEM_INSTRUCTION`
-- `DEFAULT_EMBEDDING_MODEL`
-- `SEMANTIC_DB_COLLECTION_NAME`
-- `ELASTIC_DB_COLLECTION_NAME`
-- `MODEL_DISPLAY_NAME`
-- `USER_DISPLAY_NAME`
-- `USER_CONV_DISPLAY_NAME`
-- `DEFAULT_WINDOW_MESSAGE_TURNS`
-
-The app also uses environment variables for data paths and database collection names where required.
-
 ## Architecture
 
 - `src/index.js` — app bootstrap and directory initialization
