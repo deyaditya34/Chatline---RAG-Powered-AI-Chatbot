@@ -1,0 +1,4 @@
+{
+    "startingChatMessage": "I have built a gemini cli though gemini sdk available in nodejs. So kindly just acknowledge the chat connection and ask the user to start chatting",
+    "summarizeUserConvPrompt": "summarize the above contents such that it contains all the vital information"
+}

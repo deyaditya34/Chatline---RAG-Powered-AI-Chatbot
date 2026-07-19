@@ -1,0 +1,11 @@
+{
+    "programStartPrompt": "Welcome to the gemini cli application.\nPress 1 for new stateless chat\n2 to list AI Models\n3 to get AI Model details\n4 to initiate one time conversation\n5 to initiate manually managed chat via generate content api\n6 To list the conversations done by generate content api\n7 To retrieve and continue existing conversation\n8 To delete a conversation\n",
+    "chatUserPrompt": "Ask Anything..",
+    "generateContentUserPrompt": "Note: This is a one time conversation with the model.\nAsk Anything..\n",
+    "askStatelessConvTopicUserPrompt": "Please provide the topic for this conversationn",
+    "selectConversationListUserPrompt": "select conversation for displaying entire conversation history\n",
+    "deleteConversationListUserPrompt": "select conversation to delete it permanently",
+    "continueChatUserPrompt": "Hello, Please continue your conversation.\nAsk Anything..",
+    "askAiModelNameForDetailsUserPrompt": "please provide the model name for details\n",
+    "userInputUserPrompt": ">> "
+}

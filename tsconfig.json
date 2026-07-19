@@ -12,8 +12,7 @@
 		"moduleResolution": "nodenext",
 		"target": "es2022",
 
-		"resolveJSONModule": true,
-		"checkCompability": false,
+		"resolveJsonModule": true,
 
     "types": ["node"],
     "lib": ["es2022"],
@@ -36,6 +35,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true,
+		"exactOptionalPropertyTypes": true,
 
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": true,
@@ -51,11 +51,9 @@
 		"incremental": true,
     "skipLibCheck": true,
 
-		"noImplicitReturns": true,
-		"exactOptionalPropertyTypes": true,
 
 		"allowJs": true,
-		"checkJs": true
+		"checkJs": true,
   },
 	"include": ["src/**/*"],
 	"exclude": ["dist", "node_modules"]

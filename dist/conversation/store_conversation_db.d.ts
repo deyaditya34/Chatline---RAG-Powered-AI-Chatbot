@@ -1,0 +1,2 @@
+export declare function storeConversationDb(userResponse: string, modelResponse: string, userPromptEmbedding: number[], modelResponseEmbedding: number[], convName: string): Promise<void>;
+//# sourceMappingURL=store_conversation_db.d.ts.map

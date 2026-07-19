@@ -1,0 +1,2 @@
+export declare function retrieveUploadedDocuments(userPromptEmbedding: number[], userResponse: string, convName: string, source?: string): Promise<import("@google/genai").Content[] | null>;
+//# sourceMappingURL=retrieve_uploaded_documents.d.ts.map

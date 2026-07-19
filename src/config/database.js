@@ -1,3 +1,0 @@
-export const ELASTIC_SEARCH_INDEX = process.env.ELASTIC_DB_COLLECTION_NAME;
-
-export const QDRANT_COLLECTION = process.env.SEMANTIC_DB_COLLECTION_NAME;

@@ -1,0 +1,2 @@
+export declare function retrieveConversationHistory(userPromptEmbedding: number[], userResponse: string, convName: string, source?: string): Promise<import("@google/genai").Content[] | null>;
+//# sourceMappingURL=retrieve_conversation_history.d.ts.map
