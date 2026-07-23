@@ -6,6 +6,7 @@ export interface UploadDocument {
 	uploadedAt: number;
 }
 
+// This is the conversation object
 export interface ConversationRecord {
 	contents: Content[];
 	modelVersion: string;
@@ -17,6 +18,4 @@ export interface ConversationHistory {
 	parsedConversationHistoryUser: ConversationRecord;
 	parsedConversationHistoryModel: ConversationRecord
 }
-
-
 

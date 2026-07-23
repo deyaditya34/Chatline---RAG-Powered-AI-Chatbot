@@ -16,19 +16,15 @@ import { USER_CONV_DISPLAY_NAME } from "../config/env.js";
 export async function switchConversation(convName: string): Promise<void> {
 	let userResponse;
 
-	let { parsedConversationHistoryUser, parsedConversationHistoryModel } =
-		await loadConversation(convName);
-
+	let { parsedConversationHistoryUser, parsedConversationHistoryModel } = await loadConversation(convName);
 	sanitizeAndPrintConversation(parsedConversationHistoryUser);
 
 	while (true) {
 		userResponse = await readUserInput(
 			USER_CONV_DISPLAY_NAME
 		);
-
 		if (userResponse.startsWith("/")) {
 			const [command, args] = parseCommand(userResponse);
-
 			await handleCommand(command, args);
 			break;
 		}
@@ -43,7 +39,6 @@ export async function switchConversation(convName: string): Promise<void> {
 				userResponse,
 				convName
 			);
-
 			if (pastUploadedDocumentContext) {
 				parsedConversationHistoryModel.contents.push(...pastUploadedDocumentContext);
 			}
@@ -55,14 +50,13 @@ export async function switchConversation(convName: string): Promise<void> {
 				userResponse,
 				convName
 			)
-
 			if (pastConversationContext) {
 				parsedConversationHistoryModel.contents.push(...pastConversationContext);
 			}
 		}
 
-		parsedConversationHistoryUser.contents.push(sanitizeConversation(userResponse, "user"));
-		parsedConversationHistoryModel.contents.push(sanitizeConversation(userResponse, "user"));
+		parsedConversationHistoryUser.contents.push(sanitizedUserResponse);
+		parsedConversationHistoryModel.contents.push(sanitizedUserResponse);
 
 		({ parsedConversationHistoryUser, parsedConversationHistoryModel } =
 			await enforceTokenLimit(
@@ -87,7 +81,6 @@ export async function switchConversation(convName: string): Promise<void> {
 
 		parsedConversationHistoryUser.contents.push(sanitizedModelResponse);
 		parsedConversationHistoryUser.modelVersion = modelVersion;
-
 		parsedConversationHistoryModel.contents.push(sanitizedModelResponse);
 
 		await storeConversationFile(
@@ -95,7 +88,6 @@ export async function switchConversation(convName: string): Promise<void> {
 			parsedConversationHistoryUser,
 			parsedConversationHistoryModel
 		);
-
 		await storeConversationDb(
 			userResponse,
 			modelResponse,

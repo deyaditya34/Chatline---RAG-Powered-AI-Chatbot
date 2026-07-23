@@ -3,6 +3,8 @@ import { GoogleGenAI, Pager, Chat } from "@google/genai";
 import { aiModel, embeddingModel, systemInstructionMessage } from "../config/ai.js";
 import { GEMINI_API_KEY } from "../config/env.js";
 import {} from "../types/ai.js";
+import { wrapError } from "../errors/wrapError.js";
+import { AiError } from "../errors/ai_error.js";
 export const ai = initializeAi();
 export function initializeAi() {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
@@ -89,7 +91,7 @@ export async function embedContent(content, model = embeddingModel) {
         return response;
     }
     catch (err) {
-        console.log("err -", err);
+        wrapError(err, AiError, "failed to embed content from gemini api");
     }
 }
 export async function generateContent(content, model = aiModel) {
@@ -116,11 +118,11 @@ export async function generateContent(content, model = aiModel) {
             if (parts[i].text)
                 response += parts[i].text;
         }
+        return [response, modelVersion];
     }
     catch (err) {
-        console.log("model response err -", err);
+        wrapError(err, AiError, "Failed to generate content from gemini api");
     }
-    return [response, modelVersion];
 }
 export async function createNewInteraction(content, prevInteractionId = "", model = aiModel) {
     let reqBody = {};

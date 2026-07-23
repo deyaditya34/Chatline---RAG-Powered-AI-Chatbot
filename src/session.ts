@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { DEFAULT_MODE } from "./config/env.js";
-import { conversationsDir, interactionsDir } from "./config/path.js";
+import { userConversationsDir, conversationsDir, interactionsDir } from "./config/path.js";
 
 export let mode: string = DEFAULT_MODE;
 export let currentConversationId: string = "";
@@ -34,7 +34,7 @@ export function setCurrentConversationIdFromConvId(convId: string): void {
 		return;
 	}
 
-	const conversationList = fs.readdirSync(conversationsDir);
+	const conversationList = fs.readdirSync(userConversationsDir);
 
 	const fileNo = Number(convId) - 1;
 

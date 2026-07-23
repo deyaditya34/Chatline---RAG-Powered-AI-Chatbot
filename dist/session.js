@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { DEFAULT_MODE } from "./config/env.js";
-import { conversationsDir, interactionsDir } from "./config/path.js";
+import { userConversationsDir, conversationsDir, interactionsDir } from "./config/path.js";
 export let mode = DEFAULT_MODE;
 export let currentConversationId = "";
 export function setConversationMode(convMode) {
@@ -28,7 +28,7 @@ export function setCurrentConversationIdFromConvId(convId) {
         console.log("usage: /switch <id>");
         return;
     }
-    const conversationList = fs.readdirSync(conversationsDir);
+    const conversationList = fs.readdirSync(userConversationsDir);
     const fileNo = Number(convId) - 1;
     if (fileNo > conversationList.length - 1 ||
         !Number(convId) ||

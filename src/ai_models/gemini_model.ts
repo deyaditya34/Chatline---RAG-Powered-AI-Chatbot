@@ -7,6 +7,8 @@ import {
 } from "../config/ai.js";
 import { GEMINI_API_KEY } from "../config/env.js";
 import { type ModelList, type ModelInfo } from "../types/ai.js";
+import { wrapError } from "../errors/wrapError.js";
+import { AiError } from "../errors/ai_error.js";
 
 export const ai = initializeAi();
 
@@ -112,14 +114,14 @@ export async function embedContent(content: Content, model = embeddingModel) {
 		const response = query.data;
 		return response;
 	} catch (err) {
-		console.log("err -", err);
+		wrapError(err, AiError, "failed to embed content from gemini api");
 	}
 }
 
 export async function generateContent(
 	content: Content[],
 	model = aiModel,
-) {
+): Promise<[string, string]> {
 	let response = "";
 	let modelVersion;
 
@@ -145,11 +147,11 @@ export async function generateContent(
 			if (parts[i].text)
 				response += parts[i].text;
 		}
-	} catch (err) {
-		console.log("model response err -", err);
-	}
 
-	return [response, modelVersion];
+		return [response, modelVersion];
+	} catch (err) {
+		wrapError(err, AiError, "Failed to generate content from gemini api");
+	}
 }
 
 export async function createNewInteraction(

@@ -37,8 +37,8 @@ export async function switchConversation(convName) {
                 parsedConversationHistoryModel.contents.push(...pastConversationContext);
             }
         }
-        parsedConversationHistoryUser.contents.push(sanitizeConversation(userResponse, "user"));
-        parsedConversationHistoryModel.contents.push(sanitizeConversation(userResponse, "user"));
+        parsedConversationHistoryUser.contents.push(sanitizedUserResponse);
+        parsedConversationHistoryModel.contents.push(sanitizedUserResponse);
         ({ parsedConversationHistoryUser, parsedConversationHistoryModel } =
             await enforceTokenLimit(parsedConversationHistoryUser, parsedConversationHistoryModel, userPromptEmbedding, userResponse, convName));
         let prevModelVersion = parsedConversationHistoryUser.modelVersion;
