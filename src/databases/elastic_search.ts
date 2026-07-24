@@ -2,6 +2,8 @@ import { Client } from "@elastic/elasticsearch";
 import { elasticSearchIndex } from "../config/database.js";
 import { type ElasticDocument } from "../types/elasticDb.js";
 import type { DeleteByQueryResponse, DeleteResponse, IndexResponse, IndicesDeleteResponse, IndicesGetMappingResponse } from "@elastic/elasticsearch/lib/api/types";
+import { wrapError } from "../errors/wrapError.js";
+import { DatabaseError } from "../errors/database_error.js";
 
 const client = new Client({
 	node: "http://127.0.0.1:9200"
@@ -24,31 +26,39 @@ export async function createIndex(): Promise<void> {
 			console.log(`Index '${elasticSearchIndex}' initialized`);
 		}
 	} catch (err) {
-		console.error(err);
+		wrapError(err, DatabaseError, "failed to create index in elastic DB");
 	}
 }
 
 export async function insertDocument(document: ElasticDocument): Promise<IndexResponse> {
-	const response = await client.index({
-		index: elasticSearchIndex,
-		document
-	});
+	try {
+		const response = await client.index({
+			index: elasticSearchIndex,
+			document
+		});
 
-	return response;
+		return response;
+	} catch (err) {
+		wrapError(err, DatabaseError, "failed to insert document in elastic DB");
+	}
 }
 
 export async function searchDocument(userQuery: string, size = 5) {
-	const response = await client.search({
-		index: elasticSearchIndex,
-		size,
-		query: {
-			match: {
-				text: userQuery
+	try {
+		const response = await client.search({
+			index: elasticSearchIndex,
+			size,
+			query: {
+				match: {
+					text: userQuery
+				}
 			}
-		}
-	})
+		})
 
-	return response.hits.hits;
+		return response.hits.hits;
+	} catch (err) {
+		wrapError(err, DatabaseError, "failed to search document in Elastic DB");
+	}
 }
 
 export async function searchDocuments(
@@ -57,77 +67,98 @@ export async function searchDocuments(
 	source: string,
 	size = 5
 ) {
-	const response = await client.search<ElasticDocument>({
-		index: elasticSearchIndex,
-		size,
-		query: {
-			bool: {
-				must: [
-					{
-						match: {
-							text: userQuery
+	try {
+		const response = await client.search<ElasticDocument>({
+			index: elasticSearchIndex,
+			size,
+			query: {
+				bool: {
+					must: [
+						{
+							match: {
+								text: userQuery
+							}
 						}
-					}
-				],
-				filter: [
-					{
-						term: {
-							"conversationId.keyword": conversationId
+					],
+					filter: [
+						{
+							term: {
+								"conversationId.keyword": conversationId
+							}
+						},
+						{
+							term: {
+								"sourceType.keyword": source
+							}
 						}
-					},
-					{
-						term: {
-							"sourceType.keyword": source
-						}
-					}
-				]
+					]
+				}
 			}
-		}
-	});
+		});
 
-	return response.hits.hits;
+		return response.hits.hits;
+	} catch (err) {
+		wrapError(err, DatabaseError, "failed to search documents in elastic DB");
+	}
 }
 
 export async function getIndices(): Promise<IndicesGetMappingResponse> {
-	const response = await client.indices.getMapping({
-		index: elasticSearchIndex
-	});
+	try {
+		const response = await client.indices.getMapping({
+			index: elasticSearchIndex
+		});
 
-	return response;
+		return response;
+	} catch (err) {
+		wrapError(err, DatabaseError, "failed to get indices of the elastic DB");
+	}
 }
 
 export async function deleteConversation(conversationId: string): Promise<DeleteByQueryResponse> {
-	const response = await client.deleteByQuery({
-		index: elasticSearchIndex,
-		query: {
-			bool: {
-				filter: [
-					{
-						term: {
-							"conversationId.keyword": conversationId
+	try {
+		const response = await client.deleteByQuery({
+			index: elasticSearchIndex,
+			query: {
+				bool: {
+					filter: [
+						{
+							term: {
+								"conversationId.keyword": conversationId
+							}
 						}
-					}
-				]
+					]
+				}
 			}
-		}
-	})
+		})
 
-	return response;
+		return response;
+	} catch (err) {
+		wrapError(err, DatabaseError, "failed to delete conversation in elastic DB");
+	}
 }
 
 export async function deleteDocument(documentId: string): Promise<DeleteResponse> {
-	const response = await client.delete({
-		index: elasticSearchIndex,
-		id: documentId
-	})
+	try {
+		const response = await client.delete({
+			index: elasticSearchIndex,
+			id: documentId
+		})
 
-	return response;
+		return response;
+	} catch (err) {
+		wrapError(err, DatabaseError, "failed to delete document in elastic DB");
+	}
 }
 
 export async function deleteIndex(): Promise<IndicesDeleteResponse> {
-	const response = await client.indices.delete({
-		index: elasticSearchIndex
-	});
+	try {
+		const response = await client.indices.delete({
+			index: elasticSearchIndex
+		});
 
-	return response;
+		return response;
+	} catch (err) {
+		wrapError(err, DatabaseError, "failed to delete index in elastic DB");
+	}
 }
+

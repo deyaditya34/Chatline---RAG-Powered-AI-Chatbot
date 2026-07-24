@@ -12,6 +12,7 @@ import {
 	modelConversationsDir
 } from "./config/path.js";
 import { USER_DISPLAY_NAME } from "./config/env.js";
+import { ApplicationError } from "./errors/application_error.js";
 
 async function main(): Promise<void> {
 	console.log(`\x1B[38;2;255;180;180mGemini CLI\n\x1B[0m`)
@@ -59,7 +60,15 @@ async function main(): Promise<void> {
 		if (input.startsWith("/")) {
 			const [command, args] = parseCommand(input);
 
-			await handleCommand(command, args);
+			try {
+				await handleCommand(command, args);
+			} catch (err) {
+				if (err instanceof ApplicationError) {
+					console.error(err.message);
+				}
+
+				console.error(err);
+			}
 		}
 		console.log(`\x1B[38;2;255;180;180mType /help for commands\n\x1B[0m`)
 	}

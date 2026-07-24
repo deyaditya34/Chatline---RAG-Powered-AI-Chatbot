@@ -25,45 +25,36 @@ export async function storeConversationDb(
 		uploadedAt: Date.now()
 	}
 
-	try {
-		await vectorStore.insertDocuments(
-			[
-				{
-					embedding: userPromptEmbedding,
-					payload: userPromptChunkPayload
-				},
-				{
-					embedding: modelResponseEmbedding,
-					payload: modelResponseChunkPayload
-				}
-			]
-		);
-	} catch (err) {
-		console.error("err in storing the conversations as vectors -", err);
-		return;
-	}
-
-	try {
-		await elasticStore.insertDocument(
+	await vectorStore.insertDocuments(
+		[
 			{
-				text: userResponse,
-				conversationId: convName,
-				sourceType: "conversation",
-				role: "user",
-				uploadedAt: Date.now()
-			}
-		);
-
-		await elasticStore.insertDocument(
+				embedding: userPromptEmbedding,
+				payload: userPromptChunkPayload
+			},
 			{
-				text: modelResponse,
-				conversationId: convName,
-				sourceType: "conversation",
-				role: "model",
-				uploadedAt: Date.now()
+				embedding: modelResponseEmbedding,
+				payload: modelResponseChunkPayload
 			}
-		);
-	} catch (err) {
-		console.error("err in storing the conversations as elastic search -", err);
-	}
+		]
+	);
+
+	await elasticStore.insertDocument(
+		{
+			text: userResponse,
+			conversationId: convName,
+			sourceType: "conversation",
+			role: "user",
+			uploadedAt: Date.now()
+		}
+	);
+
+	await elasticStore.insertDocument(
+		{
+			text: modelResponse,
+			conversationId: convName,
+			sourceType: "conversation",
+			role: "model",
+			uploadedAt: Date.now()
+		}
+	);
 }

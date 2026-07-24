@@ -6,14 +6,6 @@ export async function searchDocument(semanticSearch: string): Promise<void> {
 	const embeddingResult = await embedContent(sanitizeConversation(semanticSearch, "user"));
 	const embedding = embeddingResult.embedding.values;
 
-	try {
-		const searchResult = await searchCollection(embedding);
-		console.log("search result -", searchResult);
-	} catch (err) {
-		if (err instanceof Error) {
-			console.error(err.message);
-		} else {
-			console.log(err);
-		}
-	}
+	const searchResult = await searchCollection(embedding);
+	console.log("search result -", searchResult);
 }

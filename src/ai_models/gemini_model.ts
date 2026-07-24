@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GoogleGenAI, Pager, type Model, Chat, type Content } from "@google/genai";
+import { GoogleGenAI, Pager, type Model, type Content } from "@google/genai";
 import {
 	aiModel,
 	embeddingModel,
@@ -10,15 +10,8 @@ import { type ModelList, type ModelInfo } from "../types/ai.js";
 import { wrapError } from "../errors/wrapError.js";
 import { AiError } from "../errors/ai_error.js";
 
-export const ai = initializeAi();
-
-export function initializeAi(
-) {
-	const ai: GoogleGenAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-	return ai;
-}
-
 export async function aiModelList(initializedAi: GoogleGenAI) {
+	try {
 	const response: Pager<Model> = await initializedAi.models.list();
 
 	const parsedAiModelList: ModelList[] = [];
@@ -33,48 +26,36 @@ export async function aiModelList(initializedAi: GoogleGenAI) {
 	}
 
 	return parsedAiModelList;
+	} catch (err) {
+		wrapError(err, AiError, "failed to fetch the model list from gemini sdk")
+	}
 };
 
-export async function initiateChat(
-	initializedAi: GoogleGenAI,
-	model = aiModel
-) {
-	const chat = initializedAi.chats.create({
-		model
-	});
-
-	return chat;
-}
-
-export async function sendChatMessage(chat: Chat, message: string) {
-	const response = await chat.sendMessage({
-		message
-	});
-
-	return response;
-}
-
 export async function getAiModelDetails(initializedAi: GoogleGenAI, model: string) {
-	const response = await initializedAi.models.get({ model });
+	try {
+		const response = await initializedAi.models.get({ model });
 
-	if (!response) {
-		throw new Error(`invalid model name - ${model}`);
+		if (!response) {
+			throw new Error(`invalid model name - ${model}`);
+		}
+
+		const modelInfo: ModelInfo = {
+			name: response.name,
+			description: response.description,
+			displayName: response.displayName,
+			temperature: response.temperature,
+			maxTemperature: response.maxTemperature,
+			inputTokenLimit: response.inputTokenLimit,
+			outputTokenLimit: response.outputTokenLimit,
+			thinking: response?.thinking,
+			topK: response.topK,
+			topP: response.topP
+		}
+
+		return modelInfo
+	} catch (err) {
+		wrapError(err, AiError, "failed to get model details");
 	}
-
-	const modelInfo: ModelInfo = {
-		name: response.name,
-		description: response.description,
-		displayName: response.displayName,
-		temperature: response.temperature,
-		maxTemperature: response.maxTemperature,
-		inputTokenLimit: response.inputTokenLimit,
-		outputTokenLimit: response.outputTokenLimit,
-		thinking: response?.thinking,
-		topK: response.topK,
-		topP: response.topP
-	}
-
-	return modelInfo
 }
 
 export async function countTokens(contents: Content[], model: string = aiModel) {
@@ -95,7 +76,7 @@ export async function countTokens(contents: Content[], model: string = aiModel) 
 		const response = query.data;
 		return response;
 	} catch (err) {
-		console.log("err -", err);
+		wrapError(err, AiError, "failed to count tokens from gemini api");
 	}
 }
 
@@ -196,9 +177,9 @@ export async function createNewInteraction(
 
 		modelResponseId = query.data.id;
 		modelVersion = query.data.model;
-	} catch (err) {
-		console.log("err -", err);
-	}
 
-	return [modelResponse, modelResponseId, modelVersion];
+		return [modelResponse, modelResponseId, modelVersion];
+	} catch (err) {
+		wrapError(err, AiError, "gemini interaction api failed");
+	}
 }
